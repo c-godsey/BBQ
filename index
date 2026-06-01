@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <meta name="theme-color" content="#7a2e08"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="BBQ Pit Boss"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <title>BBQ Pit Boss</title>
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22BBQ%20Pit%20Boss%22%2C%22short_name%22%3A%22Pit%20Boss%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%237a2e08%22%2C%22theme_color%22%3A%22%237a2e08%22%2C%22orientation%22%3A%22portrait%22%7D"/>
+  <style>
+    :root{color-scheme:light;}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overflow:hidden;}
+    body{
+      background:#1a0d05;color:#f5e6d0;
+      font-family:-apple-system,'Segoe UI',system-ui,sans-serif;
+      display:flex;flex-direction:column;height:100%;
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .app-header{
+      background:linear-gradient(135deg,#7a2e08,#b84f10);
+      padding:12px 16px 10px;
+      padding-top:calc(12px + env(safe-area-inset-top));
+      display:flex;align-items:center;gap:10px;flex-shrink:0;
+    }
+    .app-header h1{font-size:1.2rem;font-weight:700;color:#fff;letter-spacing:.3px;}
+    .app-header p{font-size:.72rem;color:rgba(255,255,255,.75);margin-top:1px;}
+    .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#1a0d05;}
+    .scroll-inner{padding:14px 14px 24px;}
+    .tab-bar{display:flex;background:#231507;border-top:1px solid #4a2e0f;flex-shrink:0;}
+    .tab-bar button{
+      flex:1;background:none;border:none;color:#a08060;
+      padding:8px 4px 6px;cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+      font-size:.58rem;font-weight:500;letter-spacing:.2px;
+      transition:color .15s;min-height:52px;
+    }
+    .tab-bar button .tab-icon{
+      width:20px;height:20px;border-radius:4px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.65rem;font-weight:800;color:#a08060;
+      border:1.5px solid #5a3a1a;background:#2e1c0a;
+      line-height:1;
+    }
+    .tab-bar button.active{color:#e87c2a;}
+    .tab-bar button.active .tab-icon{color:#e87c2a;border-color:#e87c2a;background:#3a1f00;}
+    .tab-panel{display:none;} .tab-panel.active{display:block;}
+    h2{font-size:1.05rem;color:#f0a060;margin-bottom:12px;font-weight:700;}
+    .note{color:#a08060;font-size:.78rem;line-height:1.5;font-style:italic;margin-top:6px;}
+    .card{background:#231507;border:1px solid #4a2e0f;border-radius:12px;padding:16px;margin-bottom:12px;}
+    label{display:block;font-size:.72rem;color:#a08060;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
+    select,input[type="number"]{
+      width:100%;background:#2e1c0a;border:1.5px solid #5a3a1a;
+      color:#f5e6d0;padding:11px 12px;border-radius:8px;
+      font-size:1rem;outline:none;appearance:none;-webkit-appearance:none;
+      transition:border-color .2s;
+    }
+    select:focus,input:focus{border-color:#e87c2a;}
+    select option{background:#231507;}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+    .field-full{margin-top:10px;}
+    .result-box{
+      background:linear-gradient(135deg,#2a1500,#3a1f00);
+      border:2px solid #c07010;border-radius:12px;padding:16px;
+      margin-top:12px;display:none;
+    }
+    .result-box.show{display:block;}
+    .result-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #4a2e0f;}
+    .result-row:last-of-type{border-bottom:none;}
+    .result-label{font-size:.8rem;color:#a08060;}
+    .result-value{font-size:1rem;font-weight:700;color:#f0a060;text-align:right;max-width:55%;}
+    .result-value.big{font-size:1.25rem;}
+    .temp-list{display:flex;flex-direction:column;gap:10px;}
+    .temp-card{background:#231507;border:1px solid #4a2e0f;border-radius:10px;padding:14px;}
+    .meat-name{font-weight:700;font-size:.92rem;margin-bottom:8px;color:#f5e6d0;}
+    .temp-row{display:flex;justify-content:space-between;font-size:.82rem;padding:3px 0;}
+    .temp-row span{color:#a08060;}
+    .temp-safe{color:#2ecc71!important;font-weight:700;}
+    .temp-pull{color:#f39c12!important;font-weight:700;}
+    .temp-target{color:#e87c2a!important;font-weight:700;}
+    .temp-note{font-size:.74rem;color:#7a5030;margin-top:6px;line-height:1.4;}
+    .wood-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+    .filter-btn{
+      background:#2e1c0a;border:1.5px solid #5a3a1a;color:#a08060;
+      padding:7px 14px;border-radius:20px;cursor:pointer;font-size:.82rem;
+      transition:all .2s;min-height:36px;
+    }
+    .filter-btn.active{background:#b84f10;color:#fff;border-color:#b84f10;font-weight:600;}
+    .wood-list{display:flex;flex-direction:column;gap:10px;}
+    .wood-card{background:#231507;border:1px solid #4a2e0f;border-radius:10px;padding:14px;}
+    .wood-name{font-weight:700;font-size:.95rem;color:#f0a060;margin-bottom:2px;}
+    .wood-flavor{font-size:.78rem;color:#a08060;font-style:italic;margin-bottom:8px;}
+    .wood-section-label{font-size:.7rem;text-transform:uppercase;color:#7a5030;margin-bottom:3px;margin-top:6px;}
+    .tag{
+      display:inline-block;background:#3a2010;color:#e0a060;
+      border:1px solid #5a3a1a;font-size:.72rem;
+      padding:3px 8px;border-radius:10px;margin:2px 2px 0 0;
+    }
+    .intensity-pill{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:10px;}
+    .phase-section{margin-top:14px;}
+    .phase-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;color:#7a5030;margin-bottom:8px;}
+    .phase-wrap{margin-bottom:6px;}
+    .phase-label{display:flex;justify-content:space-between;font-size:.75rem;color:#a08060;margin-bottom:3px;}
+    .phase-bar{height:8px;background:#3a2010;border-radius:4px;overflow:hidden;}
+    .phase-fill{height:100%;border-radius:4px;transition:width .5s;}
+    #install-banner{
+      background:linear-gradient(135deg,#4a2e0f,#3a1f00);
+      border-bottom:1px solid #c07010;padding:10px 14px;
+      display:flex;align-items:center;gap:10px;flex-shrink:0;
+    }
+    #install-banner .ib-text{flex:1;font-size:.78rem;color:#f0c070;line-height:1.4;}
+    #install-banner .ib-close{background:none;border:none;color:#a08060;font-size:1.1rem;cursor:pointer;padding:4px;}
+    .guide-list{display:flex;flex-direction:column;gap:0;}
+    .guide-item{
+      background:#231507;border:1px solid #4a2e0f;
+      border-radius:10px;margin-bottom:10px;overflow:hidden;
+    }
+    .guide-header{
+      width:100%;background:none;border:none;color:#f5e6d0;
+      padding:14px 16px;text-align:left;cursor:pointer;
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:.92rem;font-weight:600;
+    }
+    .guide-header:active{background:#2e1c0a;}
+    .guide-arrow{font-size:.75rem;color:#a08060;transition:transform .25s;font-style:normal;}
+    .guide-body{display:none;padding:0 16px 16px;}
+    .guide-item.open .guide-body{display:block;}
+    .guide-item.open .guide-arrow{transform:rotate(180deg);}
+    .guide-subtitle{
+      font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;
+      color:#c07010;margin:14px 0 8px;font-weight:700;
+    }
+    .guide-step{display:flex;gap:10px;margin-bottom:10px;}
+    .step-num{
+      flex-shrink:0;width:22px;height:22px;border-radius:50%;
+      background:#b84f10;color:#fff;font-size:.72rem;font-weight:700;
+      display:flex;align-items:center;justify-content:center;margin-top:1px;
+    }
+    .step-text{font-size:.82rem;color:#d0b090;line-height:1.5;}
+    .step-text strong{color:#f0a060;font-weight:600;}
+    .guide-tip{
+      background:#2e1c0a;border-left:3px solid #c07010;
+      border-radius:0 6px 6px 0;padding:10px 12px;
+      font-size:.78rem;color:#a08060;line-height:1.5;margin-top:10px;
+    }
+    .guide-tip strong{color:#f0a060;}
+    .guide-temps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;}
+    .gt-box{background:#3a2010;border-radius:6px;padding:8px;text-align:center;}
+    .gt-label{font-size:.65rem;color:#a08060;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;}
+    .gt-val{font-size:.95rem;font-weight:700;color:#f0a060;}
+  </style>
+</head>
+<body>
+
+<div id="install-banner">
+  <span class="ib-text"><strong>Add to Home Screen:</strong> iOS — tap Share then "Add to Home Screen" &nbsp;|&nbsp; Android — tap menu then "Add to Home Screen"</span>
+  <button class="ib-close" onclick="dismissBanner()">X</button>
+</div>
+
+<div class="app-header">
+  <div>
+    <h1>BBQ Pit Boss</h1>
+    <p>Times &middot; Temps &middot; Salt &middot; Guides</p>
+  </div>
+</div>
+
+<div class="content">
+  <div class="scroll-inner">
+
+    <!-- COOK TIME -->
+    <div id="tab-cook" class="tab-panel active">
+      <h2>Cook Time Calculator</h2>
+      <div class="card">
+        <label>Meat Type</label>
+        <select id="ct-meat" onchange="updateCookOptions()">
+          <optgroup label="Beef">
+            <option value="brisket">Brisket (whole packer)</option>
+            <option value="brisket-flat">Brisket (flat only)</option>
+            <option value="beef-ribs">Beef Back Ribs</option>
+            <option value="beef-short-ribs">Beef Short Ribs</option>
+            <option value="tri-tip">Tri-Tip</option>
+            <option value="ribeye">Ribeye Steak</option>
+            <option value="ny-strip">NY Strip Steak</option>
+            <option value="chuck-roast">Chuck Roast</option>
+          </optgroup>
+          <optgroup label="Pork">
+            <option value="pork-shoulder">Pork Shoulder / Butt</option>
+            <option value="spare-ribs">Pork Spare Ribs</option>
+            <option value="baby-back">Baby Back Ribs</option>
+            <option value="pork-belly">Pork Belly</option>
+            <option value="pork-loin">Pork Loin</option>
+            <option value="pork-tenderloin">Pork Tenderloin</option>
+          </optgroup>
+          <optgroup label="Poultry">
+            <option value="whole-chicken">Whole Chicken</option>
+            <option value="chicken-thighs">Chicken Thighs</option>
+            <option value="chicken-breast">Chicken Breast</option>
+            <option value="whole-turkey">Whole Turkey</option>
+            <option value="turkey-breast">Turkey Breast</option>
+          </optgroup>
+          <optgroup label="Lamb">
+            <option value="lamb-shoulder">Lamb Shoulder</option>
+            <option value="lamb-leg">Leg of Lamb</option>
+            <option value="lamb-chops">Lamb Chops</option>
+          </optgroup>
+          <optgroup label="Fish">
+            <option value="salmon">Salmon (fillet)</option>
+            <option value="whole-fish">Whole Fish</option>
+          </optgroup>
+        </select>
+        <div class="field-row">
+          <div>
+            <label>Cooking Method</label>
+            <select id="ct-method" onchange="calculateCookTime()">
+              <option value="smoke">Smoking</option>
+              <option value="grill">Grilling</option>
+              <option value="reverse">Reverse Sear</option>
+              <option value="oven">Oven Roast</option>
+            </select>
+          </div>
+          <div>
+            <label>Doneness</label>
+            <select id="ct-doneness" onchange="calculateCookTime()">
+              <option value="medium-rare">Med-Rare</option>
+              <option value="medium">Medium</option>
+              <option value="medium-well">Med-Well</option>
+              <option value="well">Well / Pull</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row" style="margin-top:10px">
+          <div>
+            <label>Weight</label>
+            <input type="number" id="ct-weight" placeholder="e.g. 12" min="0.1" step="0.1" inputmode="decimal" oninput="calculateCookTime()"/>
+          </div>
+          <div>
+            <label>Unit</label>
+            <select id="ct-unit" onchange="calculateCookTime()">
+              <option value="lb">lbs</option>
+              <option value="kg">kg</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="cook-result" class="result-box">
+        <div class="result-row"><span class="result-label">Pit Temp</span><span class="result-value big" id="res-pit-temp">--</span></div>
+        <div class="result-row"><span class="result-label">Cook Time</span><span class="result-value big" id="res-total-time">--</span></div>
+        <div class="result-row"><span class="result-label">Pull At (internal)</span><span class="result-value" id="res-pull-temp">--</span></div>
+        <div class="result-row"><span class="result-label">Serve Target</span><span class="result-value" id="res-final-temp">--</span></div>
+        <div class="result-row"><span class="result-label">Rest Time</span><span class="result-value" id="res-rest">--</span></div>
+        <div id="res-notes" class="note"></div>
+        <div id="phase-bars"></div>
+      </div>
+      <div id="inline-guide"></div>
+    </div>
+
+    <!-- TEMP GUIDE -->
+    <div id="tab-temps" class="tab-panel">
+      <h2>Temperature Guide</h2>
+      <p class="note" style="margin-bottom:12px">Pull = remove from heat. Carryover cooking adds 5-10 degrees F during rest.</p>
+      <div class="temp-list" id="temp-grid"></div>
+    </div>
+
+    <!-- SALT & BRINE -->
+    <div id="tab-salt" class="tab-panel">
+      <h2>Salt and Brine Calculator</h2>
+      <div class="card">
+        <div class="field-row">
+          <div>
+            <label>Meat Weight</label>
+            <input type="number" id="salt-weight" placeholder="e.g. 5" min="0.1" step="0.1" inputmode="decimal" oninput="calculateSalt()"/>
+          </div>
+          <div>
+            <label>Unit</label>
+            <select id="salt-unit" onchange="calculateSalt()">
+              <option value="lb">lbs</option>
+              <option value="kg">kg</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-full">
+          <label>Method</label>
+          <select id="salt-method" onchange="calculateSalt()">
+            <option value="dry-rub">Dry Rub (surface application)</option>
+            <option value="dry-brine">Dry Brine (overnight cure)</option>
+            <option value="wet-brine">Wet Brine (submerged)</option>
+            <option value="injection">Injection</option>
+          </select>
+        </div>
+        <div class="field-full">
+          <label>Meat Type</label>
+          <select id="salt-meat" onchange="calculateSalt()">
+            <option value="beef-thick">Beef -- thick cut</option>
+            <option value="beef-steak">Beef -- steak</option>
+            <option value="pork-thick">Pork -- thick cut</option>
+            <option value="pork-thin">Pork -- ribs / thin</option>
+            <option value="poultry-whole">Poultry -- whole bird</option>
+            <option value="poultry-pieces">Poultry -- pieces</option>
+            <option value="fish">Fish / Seafood</option>
+          </select>
+        </div>
+      </div>
+      <div id="salt-result" class="result-box">
+        <div class="result-row"><span class="result-label">Salt Amount</span><span class="result-value big" id="res-salt-amount">--</span></div>
+        <div class="result-row"><span class="result-label">Salt Type</span><span class="result-value" id="res-salt-type">--</span></div>
+        <div class="result-row" id="brine-water-row"><span class="result-label">Water</span><span class="result-value" id="res-brine-water">--</span></div>
+        <div class="result-row" id="brine-time-row"><span class="result-label">Time</span><span class="result-value" id="res-brine-time">--</span></div>
+        <div class="result-row" id="brine-ratio-row"><span class="result-label">Ratio</span><span class="result-value" id="res-brine-ratio">--</span></div>
+        <div id="salt-notes" class="note"></div>
+      </div>
+    </div>
+
+    <!-- WOOD -->
+    <div id="tab-wood" class="tab-panel">
+      <h2>Smoke Wood Pairings</h2>
+      <p class="note" style="margin-bottom:12px">Match wood intensity to the meat. Delicate proteins need lighter smoke.</p>
+      <div class="wood-filters" id="wood-filters">
+        <button class="filter-btn active" onclick="filterWood('all',this)">All</button>
+        <button class="filter-btn" onclick="filterWood('beef',this)">Beef</button>
+        <button class="filter-btn" onclick="filterWood('pork',this)">Pork</button>
+        <button class="filter-btn" onclick="filterWood('poultry',this)">Poultry</button>
+        <button class="filter-btn" onclick="filterWood('fish',this)">Fish</button>
+        <button class="filter-btn" onclick="filterWood('lamb',this)">Lamb</button>
+      </div>
+      <div class="wood-list" id="wood-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="active" onclick="showTab('cook',this)">
+    <span class="tab-icon">CT</span>Cook Time
+  </button>
+  <button onclick="showTab('temps',this)">
+    <span class="tab-icon">TM</span>Temps
+  </button>
+  <button onclick="showTab('salt',this)">
+    <span class="tab-icon">SB</span>Salt
+  </button>
+  <button onclick="showTab('wood',this)">
+    <span class="tab-icon">WD</span>Wood
+  </button>
+</div>
+
+<script>
+const MEAT={
+  brisket:{name:'Brisket (whole packer)',smokeRate:1.25,ovenRate:1.1,pull:{smoke:200,oven:195},final:205,rest:'45-90 min',doneness:['well'],cat:'beef',notes:'The stall (150-170 F) is real. Wrap in butcher paper at 165 F internal to push through.'},
+  'brisket-flat':{name:'Brisket (flat)',smokeRate:1.1,ovenRate:1.0,pull:{smoke:195,oven:190},final:200,rest:'30-60 min',doneness:['well'],cat:'beef',notes:'Leaner than full packer -- wrap at 155 F and add beef tallow inside the wrap.'},
+  'beef-ribs':{name:'Beef Back Ribs',smokeRate:1.0,ovenRate:0.9,pull:{smoke:205,oven:205},final:205,rest:'20-30 min',doneness:['well'],cat:'beef',notes:'Cook by feel. Probe should slide like butter at 205 F.'},
+  'beef-short-ribs':{name:'Beef Short Ribs',smokeRate:1.15,ovenRate:1.1,pull:{smoke:210,oven:210},final:210,rest:'30-45 min',doneness:['well'],cat:'beef',notes:"Don't rush -- 210 F gives full gelatin breakdown."},
+  'tri-tip':{name:'Tri-Tip',smokeRate:0.75,grillRate:6,reverseRate:0.75,ovenRate:0.7,pull:{smoke:130,grill:130,reverse:130,oven:130},final:135,rest:'10-15 min',doneness:['medium-rare','medium','medium-well','well'],cat:'beef',notes:'Reverse sear is excellent. Santa Maria style: direct red-oak fire.'},
+  ribeye:{name:'Ribeye Steak',grillRate:4,reverseRate:0.5,ovenRate:0.5,pull:{grill:125,reverse:125,oven:125},final:130,rest:'5-8 min',doneness:['medium-rare','medium','medium-well','well'],cat:'beef',notes:'For steaks 1.5 inches or thicker, reverse sear wins. Rest before the final sear.'},
+  'ny-strip':{name:'NY Strip',grillRate:4,reverseRate:0.5,ovenRate:0.5,pull:{grill:125,reverse:125,oven:125},final:130,rest:'5-8 min',doneness:['medium-rare','medium','medium-well','well'],cat:'beef',notes:'High heat, quick cook. Fat cap toward fire first.'},
+  'chuck-roast':{name:'Chuck Roast',smokeRate:1.15,ovenRate:1.05,pull:{smoke:205,oven:205},final:205,rest:'30-45 min',doneness:['well'],cat:'beef',notes:"Poor man's brisket. Wrap at 165 F. Great pulled or sliced."},
+  'pork-shoulder':{name:'Pork Shoulder / Butt',smokeRate:1.5,ovenRate:1.25,pull:{smoke:200,oven:195},final:205,rest:'60-120 min',doneness:['well'],cat:'pork',notes:'Wrap at 165 F to bust the stall. Rest in a cooler up to 2 hours.'},
+  'spare-ribs':{name:'Pork Spare Ribs',pull:{smoke:195},final:200,rest:'10-15 min',doneness:['well'],cat:'pork',setsTime:{smoke:'5-6 hrs'},notes:'3-2-1 method: 3 hrs smoke, 2 hrs foil-wrapped, 1 hr unwrapped. Bend test to confirm.'},
+  'baby-back':{name:'Baby Back Ribs',pull:{smoke:190},final:195,rest:'10 min',doneness:['well'],cat:'pork',setsTime:{smoke:'4-5 hrs'},notes:'2-2-1 method. Remove membrane from bone side before cooking.'},
+  'pork-belly':{name:'Pork Belly',smokeRate:1.0,ovenRate:0.9,pull:{smoke:200,oven:195},final:200,rest:'15-20 min',doneness:['well'],cat:'pork',notes:'Score the fat cap. Cube at 195 F and sauce for burnt ends.'},
+  'pork-loin':{name:'Pork Loin',smokeRate:0.5,reverseRate:0.5,ovenRate:0.4,pull:{smoke:140,oven:140,reverse:140},final:145,rest:'10-15 min',doneness:['medium','medium-well','well'],cat:'pork',notes:'Very lean -- do NOT exceed 150 F or it turns dry and chalky.'},
+  'pork-tenderloin':{name:'Pork Tenderloin',smokeRate:0.4,grillRate:5,reverseRate:0.3,ovenRate:0.35,pull:{smoke:138,grill:138,reverse:138,oven:138},final:145,rest:'5-8 min',doneness:['medium','medium-well'],cat:'pork',notes:'Small and cooks fast. Remove silver skin before cooking.'},
+  'whole-chicken':{name:'Whole Chicken',smokeRate:0.5,ovenRate:0.4,pull:{smoke:160,oven:160},final:165,rest:'10-15 min',doneness:['well'],cat:'poultry',notes:'Spatchcock reduces cook time about 25%. Overnight brine makes a big difference.'},
+  'chicken-thighs':{name:'Chicken Thighs',grillRate:7,pull:{smoke:175,grill:175},final:185,rest:'5 min',doneness:['well'],cat:'poultry',setsTime:{smoke:'1.5-2 hrs',grill:'35-45 min'},notes:'Better texture at 185-190 F. Finish on high heat for crispy skin.'},
+  'chicken-breast':{name:'Chicken Breast',smokeRate:0.4,grillRate:6,ovenRate:0.35,pull:{smoke:155,grill:155,oven:155},final:165,rest:'5 min',doneness:['well'],cat:'poultry',notes:'Pull at 155 F -- carryover finishes it. Brine at least 2 hours.'},
+  'whole-turkey':{name:'Whole Turkey',smokeRate:0.5,ovenRate:0.45,pull:{smoke:160,oven:160},final:165,rest:'30-45 min',doneness:['well'],cat:'poultry',notes:'Spatchcock strongly recommended. Check thigh AND breast temp.'},
+  'turkey-breast':{name:'Turkey Breast',smokeRate:0.45,ovenRate:0.4,pull:{smoke:155,oven:155},final:165,rest:'15-20 min',doneness:['well'],cat:'poultry',notes:'Brine 12-24 hrs. Bone-in stays moister.'},
+  'lamb-shoulder':{name:'Lamb Shoulder',smokeRate:1.0,ovenRate:0.9,pull:{smoke:195,oven:190},final:200,rest:'30-45 min',doneness:['well'],cat:'lamb',notes:'Treat like pork shoulder -- time breaks down the collagen.'},
+  'lamb-leg':{name:'Leg of Lamb',smokeRate:0.6,reverseRate:0.6,ovenRate:0.5,pull:{smoke:130,reverse:130,oven:130},final:135,rest:'15-20 min',doneness:['medium-rare','medium','medium-well','well'],cat:'lamb',notes:'Butterflied cooks faster. Medium-rare is ideal.'},
+  'lamb-chops':{name:'Lamb Chops',grillRate:4,pull:{grill:125},final:130,rest:'3-5 min',doneness:['medium-rare','medium'],cat:'lamb',notes:'2-3 min per side on screaming hot grill.'},
+  salmon:{name:'Salmon (fillet)',smokeRate:0.35,grillRate:4,ovenRate:0.25,pull:{smoke:140,grill:125,oven:125},final:145,rest:'3-5 min',doneness:['medium','well'],cat:'fish',notes:'Wild salmon is excellent at 125 F. Skin side down first.'},
+  'whole-fish':{name:'Whole Fish',smokeRate:0.4,grillRate:5,ovenRate:0.3,pull:{smoke:140,grill:140,oven:140},final:145,rest:'5 min',doneness:['well'],cat:'fish',notes:'Score the sides. Fish flakes at 145 F. Wait for it to release before flipping.'}
+};
+
+const PIT={smoke:{beef:'225-250 F',pork:'225-250 F',poultry:'275 F',lamb:'250 F',fish:'225 F'},grill:{beef:'450-550 F',pork:'400-450 F',poultry:'400 F',lamb:'450 F',fish:'400 F'},reverse:{beef:'225 F then 500 F+',pork:'225 F then 400 F',poultry:'225 F',lamb:'225 F then 450 F',fish:'225 F'},oven:{beef:'275 F',pork:'275 F',poultry:'325 F',lamb:'275 F',fish:'275 F'}};
+const DONENESS={beef:{'medium-rare':{pull:125,final:130},'medium':{pull:130,final:135},'medium-well':{pull:140,final:145},'well':{pull:160,final:165}},pork:{'medium':{pull:140,final:145},'medium-well':{pull:145,final:150},'well':{pull:195,final:200}},poultry:{'well':{pull:160,final:165}},lamb:{'medium-rare':{pull:125,final:130},'medium':{pull:130,final:135},'medium-well':{pull:140,final:145},'well':{pull:155,final:160}},fish:{'medium':{pull:120,final:125},'well':{pull:140,final:145}}};
+
+const TEMPS=[
+  {name:'Beef Steak',safe:145,pull:125,target:130,note:'125=rare, 130=med-rare, 140=medium, 160=well done'},
+  {name:'Brisket / Chuck Roast',safe:145,pull:200,target:205,note:'Probe slides like butter at 205 F -- trust the probe, not the clock'},
+  {name:'Beef Ribs',safe:145,pull:200,target:205,note:'Collagen fully renders at 200 F plus. Probe feel matters more than temp.'},
+  {name:'Pork Shoulder / Butt',safe:145,pull:195,target:205,note:'For pulling: 200-205 F. For slicing: 185 F.'},
+  {name:'Pork Ribs',safe:145,pull:185,target:195,note:'Bend test: rack should crack when picked up from one end'},
+  {name:'Pork Loin / Chops',safe:145,pull:140,target:145,note:'Do NOT exceed 150 F -- lean meat goes chalky fast'},
+  {name:'Whole Chicken',safe:165,pull:160,target:165,note:'Check thigh at the thickest point, away from bone'},
+  {name:'Chicken Breast',safe:165,pull:155,target:165,note:'Pull at 155 -- carryover finishes it safely to 165 F'},
+  {name:'Whole Turkey',safe:165,pull:160,target:165,note:'Check thigh AND breast separately -- they cook at different rates'},
+  {name:'Lamb Chops / Leg',safe:145,pull:125,target:130,note:'Med-rare preferred. Above 145 F it gets gamey.'},
+  {name:'Lamb Shoulder',safe:145,pull:190,target:200,note:'Low and slow like pork shoulder -- collagen needs time'},
+  {name:'Salmon',safe:145,pull:120,target:125,note:'Many prefer 125 F (medium). USDA says 145 F.'},
+  {name:'Whole Fish',safe:145,pull:140,target:145,note:'Flesh turns opaque and flakes easily at 145 F'},
+  {name:'Pork Belly',safe:145,pull:190,target:200,note:'Cube at 195 F and sauce for burnt ends finish'}
+];
+
+const GUIDES=[
+  {title:'Brisket (Whole Packer)',category:'Beef',temps:[{label:'Pit Temp',val:'225-250 F'},{label:'Wrap At',val:'165 F'},{label:'Pull At',val:'200-205 F'}],sections:[{title:'The Night Before',steps:[{text:'<strong>Trim the fat cap</strong> to about 1/4 inch. Trim any hard white fat chunks completely -- they will not render down during the cook.'},{text:'<strong>Separate the point from the flat</strong> by cutting through the fat seam if you want burnt ends later. Otherwise leave it whole.'},{text:'<strong>Apply binder</strong> -- a thin coat of yellow mustard or olive oil to help the rub stick. The mustard flavor cooks off completely.'},{text:'<strong>Season generously</strong> with kosher salt, coarse black pepper, and optional garlic powder. Use a 50/50 salt-pepper ratio as a baseline (the "Aaron Franklin method").'},{text:'<strong>Rest uncovered in the fridge</strong> for 8-12 hours. This forms a tacky surface called a pellicle that helps smoke and bark develop.'}]},{title:'The Cook',steps:[{text:'<strong>Fire the smoker to 225-250 F</strong> using oak, hickory, or pecan. Let it run clean -- thin blue smoke, not thick white smoke.'},{text:'<strong>Place brisket fat side up</strong> (or toward the heat source). Insert a probe thermometer into the thickest part of the flat, not touching fat.'},{text:'<strong>Do not open the smoker</strong> for the first 3-4 hours. Every time you open it you lose 15-20 minutes of cook time.'},{text:'<strong>Watch for the stall at 150-170 F internal.</strong> The brisket will stop rising in temp for 1-4 hours as moisture evaporates. This is normal -- do not panic and do not raise the heat.'},{text:'<strong>Wrap at 165 F</strong> in a double layer of butcher paper (preferred) or foil. Butcher paper breathes and preserves bark better. Foil speeds things up but softens the bark.'},{text:'<strong>Return to smoker</strong> and cook until 200-205 F. Start probing at 195 F -- you are looking for zero resistance, like pushing the probe into warm butter.'}]},{title:'The Rest',steps:[{text:'<strong>Pull off the smoker and do not unwrap.</strong> Place the wrapped brisket in an empty cooler with towels packed around it.'},{text:'<strong>Rest for 1-4 hours minimum.</strong> A 2-hour rest is ideal. The internal temp continues to equalize and moisture redistributes -- this is not optional.'},{text:'<strong>Slice against the grain</strong> in pencil-thick slices. The flat and point have different grain directions -- adjust your angle when you cross from one to the other.'}],tip:'<strong>Burnt ends:</strong> Cube the point into 1.5-inch pieces, toss in BBQ sauce and a touch of honey, return to the smoker at 275 F uncovered for 45-60 minutes until caramelized.'}]},
+  {title:'Pork Shoulder / Pulled Pork',category:'Pork',temps:[{label:'Pit Temp',val:'225-250 F'},{label:'Wrap At',val:'165 F'},{label:'Pull At',val:'200-205 F'}],sections:[{title:'Prep',steps:[{text:'<strong>Trim excess hard fat</strong> but leave the fat cap mostly intact -- it bastes the meat as it renders.'},{text:'<strong>Score the fat cap</strong> in a crosshatch pattern to help the rub penetrate and for better fat rendering.'},{text:'<strong>Apply a binder</strong> (mustard or hot sauce) then coat heavily with your rub. A good base rub: salt, brown sugar, paprika, black pepper, garlic powder, onion powder, cayenne.'},{text:'<strong>Dry brine overnight</strong> uncovered in the fridge. The longer the better -- up to 24 hours.'}]},{title:'The Cook',steps:[{text:'<strong>Start with a cold shoulder straight from the fridge.</strong> The cold surface actually helps more smoke adhere during the early hours.'},{text:'<strong>Smoke at 225-250 F</strong> fat side up. Use apple, cherry, or hickory wood. Apple gives a sweeter, milder smoke that pairs perfectly with pork.'},{text:'<strong>Spritz every 90 minutes</strong> after the first 3 hours with apple juice, apple cider vinegar, or a 50/50 mix. This keeps the surface moist and helps bark development.'},{text:'<strong>Expect a stall at 160-170 F.</strong> Wrap in butcher paper or foil when you hit 165 F. Add a small pour of apple juice or butter inside the wrap before sealing.'},{text:'<strong>Cook until 200-205 F.</strong> Start probing at 195 F. The bone should wiggle freely and the probe should meet no resistance.'}]},{title:'Pulling and Serving',steps:[{text:'<strong>Rest in the cooler for at least 1-2 hours.</strong> This step is what separates good pulled pork from great pulled pork.'},{text:'<strong>Pull with bear claws or forks</strong> while still warm. The meat should fall apart with almost no effort.'},{text:'<strong>Mix in any collected juices</strong> from the wrap before serving -- they are packed with flavor and help keep the meat moist.'},{text:'<strong>Season after pulling</strong> with a little extra salt, apple cider vinegar, and a light drizzle of your sauce. Serve the sauce on the side.'}],tip:'<strong>Bark trick:</strong> If the bark softened in the wrap, place the unwrapped shoulder back on the smoker at 275 F for 20-30 minutes before resting. The bark will firm right back up.'}]},
+  {title:'Pork Ribs (3-2-1 Method)',category:'Pork',temps:[{label:'Pit Temp',val:'225-250 F'},{label:'Method',val:'3-2-1'},{label:'Done At',val:'195-203 F'}],sections:[{title:'Prep',steps:[{text:'<strong>Remove the membrane</strong> from the bone side. Slide a butter knife under it at one end, grab with a paper towel for grip, and peel it off in one strip. This is non-negotiable -- the membrane is rubbery and blocks smoke and seasoning.'},{text:'<strong>Trim any loose flaps</strong> of meat that would burn before the rest of the rack finishes cooking.'},{text:'<strong>Season both sides</strong> with salt first, then your rub. Press the rub in firmly -- do not just dust it on. Let it sit at least 30 minutes, or overnight uncovered in the fridge.'}]},{title:'The 3-2-1 Cook',steps:[{text:'<strong>Phase 1 -- 3 hours unwrapped at 225-250 F.</strong> Bone side down. The ribs build a mahogany bark and absorb smoke. Do not open the lid.'},{text:'<strong>Phase 2 -- 2 hours wrapped in foil.</strong> Lay the rack on two sheets of foil, add a few tablespoons of butter, a drizzle of honey, and a splash of apple juice or brown sugar. Wrap tightly so no steam escapes. Return to the smoker.'},{text:'<strong>Phase 3 -- 1 hour unwrapped.</strong> Unwrap and return to the smoker bone side down. Sauce if you want at the 30-minute mark and let it set. This step firms up the bark and caramelizes any sauce.'},{text:'<strong>Test for doneness</strong> with the bend test: pick up the rack with tongs at one end. It should bend dramatically and the bark should crack. A probe should slide through the meat between bones with no resistance.'}],tip:'<strong>Baby backs:</strong> Use a 2-2-1 method instead. They are smaller and more tender to begin with -- 3-2-1 can make them fall-off-the-bone to the point of mush, which competition judges actually penalize.'}]},
+  {title:'Ribeye / NY Strip Steak',category:'Beef',temps:[{label:'Pit/Oven',val:'225-250 F'},{label:'Pull At',val:'125 F'},{label:'Sear Temp',val:'600 F+'}],sections:[{title:'Prep',steps:[{text:'<strong>Use steaks at least 1.5 inches thick</strong> for best results. Thin steaks are harder to control and harder to get a good crust without overcooking.'},{text:'<strong>Season generously</strong> with kosher salt and coarse black pepper on all surfaces including the sides. Do this either right before cooking or at least 45 minutes ahead (long enough for the salt to draw moisture back in).'},{text:'<strong>Bring the steak to room temperature</strong> for 30-60 minutes before cooking for more even results. Pat completely dry with paper towels before it goes on the heat.'}]},{title:'Reverse Sear Method (Recommended)',steps:[{text:'<strong>Preheat your oven or smoker to 225-250 F.</strong> Place steaks on a wire rack over a sheet pan. A light touch of smoke here (oak or cherry) adds incredible flavor.'},{text:'<strong>Cook low and slow until internal temp is 115-120 F</strong> for a medium-rare finish (target 130 F). This takes about 25-45 minutes depending on thickness.'},{text:'<strong>Rest the steak while you crank the heat.</strong> Get a cast iron skillet screaming hot -- 5-7 minutes over highest heat. You want it smoking before the steak goes in. Alternatively, get your grill as hot as it will go.'},{text:'<strong>Pat the steak dry again</strong> (critical -- any surface moisture kills your crust) then sear in a thin layer of high-smoke-point oil (avocado, refined coconut, or clarified butter).'},{text:'<strong>Sear 45-60 seconds per side.</strong> Press it down flat for full surface contact. Sear the edges too by standing it on its side. Total sear time: 2-3 minutes.'},{text:'<strong>Add butter, garlic, and thyme</strong> to the pan in the last 60 seconds and baste the steak continuously.'}],tip:'<strong>Why reverse sear?</strong> Low-and-slow first means the entire steak reaches the target temp evenly, wall to wall. The final sear is purely cosmetic -- crust only. The result is edge-to-edge perfect doneness with zero gray band.'}]},
+  {title:'Whole Chicken',category:'Poultry',temps:[{label:'Pit Temp',val:'275-325 F'},{label:'Pull At',val:'160 F breast'},{label:'Thigh Target',val:'175-185 F'}],sections:[{title:'Brine (Do Not Skip This)',steps:[{text:'<strong>Wet brine for 4-12 hours:</strong> dissolve 1 cup kosher salt per gallon of cold water. Add aromatics if you want -- garlic, bay leaves, peppercorns, thyme. Submerge the bird completely.'},{text:'<strong>Or dry brine:</strong> rub 1 tsp kosher salt per pound all over the bird, including under the skin. Rest uncovered on a rack in the fridge for 12-24 hours. This also dries the skin for better crispiness.'},{text:'<strong>Rinse and pat completely dry</strong> after wet brining. Dry skin is the key to crispy results.'}]},{title:'Prep',steps:[{text:'<strong>Spatchcock (strongly recommended):</strong> Use kitchen shears to cut along both sides of the backbone and remove it. Flip the bird and press firmly on the breastbone to flatten. This gives faster, more even cooking and far better skin.'},{text:'<strong>Loosen the skin</strong> over the breast and thighs and rub butter or oil directly onto the meat under the skin. Season the outside of the skin with your rub or just salt, pepper, and paprika.'},{text:'<strong>Tuck the wing tips</strong> behind the bird or trim them off so they do not burn.'}]},{title:'The Cook',steps:[{text:'<strong>Smoke at 275-325 F.</strong> Higher heat (325 F) gives crispier skin. Lower (275 F) gives more smoke flavor but rubbery skin. Find your balance.'},{text:'<strong>Use mild wood</strong> -- apple or cherry. Hickory or mesquite will overpower the delicate chicken flavor.'},{text:'<strong>Insert a probe into the thickest part of the breast</strong>, not touching bone. Cook until breast hits 160 F.'},{text:'<strong>Check the thigh separately.</strong> For fully cooked, tender thighs you want 175-185 F. The thigh can always handle more heat than the breast.'},{text:'<strong>If skin is not crispy enough</strong>, finish at 400-425 F for the last 10 minutes, or briefly under the broiler.'},{text:'<strong>Rest 10-15 minutes</strong> before carving. The juices will redistribute.'}],tip:'<strong>The skin problem:</strong> Rubbery skin is caused by two things -- moisture on the surface before cooking, and temperatures too low to render the fat in the skin. Fix it by brining, drying thoroughly, and cooking at 300 F or higher.'}]},
+  {title:'Pork Belly / Burnt Ends',category:'Pork',temps:[{label:'Phase 1',val:'225-250 F'},{label:'Cube At',val:'195 F'},{label:'Phase 2',val:'275 F'}],sections:[{title:'Prep',steps:[{text:'<strong>Score the fat cap</strong> in a 1-inch crosshatch pattern, cutting about halfway through the fat. This helps the fat render and lets seasoning penetrate.'},{text:'<strong>Season all sides generously</strong> -- the belly has a lot of surface area. Use a rub with salt, pepper, paprika, brown sugar, garlic, and cayenne. Let sit uncovered in the fridge for at least 4 hours, ideally overnight.'}]},{title:'Phase 1 -- Smoke the Slab',steps:[{text:'<strong>Smoke fat side up at 225-250 F</strong> using apple, cherry, or hickory wood for 5-6 hours until internal temp reaches 190-195 F.'},{text:'<strong>Spritz every 90 minutes</strong> with apple juice or apple cider vinegar to keep the surface moist and build a better bark.'},{text:'<strong>The fat should look rendered</strong> and slightly translucent at 195 F. The meat should feel firm but probe relatively easily.'}]},{title:'Phase 2 -- Burnt Ends',steps:[{text:'<strong>Cube into 1.5-inch pieces</strong>. Try to keep them uniform for even cooking.'},{text:'<strong>Toss the cubes in a bowl</strong> with BBQ sauce, honey, a touch of butter, and optionally a sprinkle of brown sugar. Coat thoroughly.'},{text:'<strong>Spread into a single layer</strong> in a foil pan or directly on the grate. Return to the smoker or grill at 275-300 F for 45-60 minutes uncovered.'},{text:'<strong>Stir and flip every 20 minutes.</strong> You are looking for caramelized, slightly sticky cubes that have firmed up and taken on a deep mahogany color.'}],tip:'<strong>The texture goal:</strong> Burnt ends should have a firm, slightly chewy exterior with a soft, fatty, melting interior. If they are falling apart they went too long. If they are dry they went too long at too high a heat.'}]},
+  {title:'Smoked Salmon',category:'Fish',temps:[{label:'Pit Temp',val:'180-225 F'},{label:'Pull At',val:'140 F'},{label:'Brine Time',val:'8-12 hrs'}],sections:[{title:'The Brine (Essential)',steps:[{text:'<strong>Mix a cure:</strong> 1 cup kosher salt, 1 cup brown sugar, and optional spices (dill, garlic, cracked pepper, lemon zest) per 2 lbs of fish.'},{text:'<strong>Coat the flesh side</strong> of the fillet completely. Place skin side down in a dish, cover, and refrigerate for 8-12 hours. Thinner fillets need less time -- 6 hours minimum.'},{text:'<strong>Rinse thoroughly</strong> under cold water and pat completely dry. Place on a wire rack and let air-dry in the fridge uncovered for 1-2 hours. This forms a pellicle -- a dry, tacky surface that allows smoke to adhere properly.'}]},{title:'The Smoke',steps:[{text:'<strong>Use alder wood.</strong> It is the traditional choice for salmon and its mild, slightly sweet smoke does not overpower the fish. Apple or cherry also work well.'},{text:'<strong>Start low at 180 F</strong> for the first hour to build smoke flavor gradually. This also prevents the albumin (white protein) from seizing and squeezing out too aggressively.'},{text:'<strong>Raise to 225 F</strong> and cook until internal temp reaches 140 F -- about 2-3 hours total depending on fillet thickness.'},{text:'<strong>Do not flip the salmon.</strong> Cook it entirely skin side down on the grate. The skin acts as a barrier and keeps the fish intact.'},{text:'<strong>Watch for albumin</strong> -- the white, curd-like protein that seeps out. Some is normal. A lot means your temperature spiked too high. If you see heavy albumin, drop the smoker temp immediately.'}],tip:'<strong>Hot vs. cold smoked:</strong> This guide is for hot-smoked salmon (fully cooked). Cold smoking (below 90 F) is a different process that cures but does not fully cook the fish and requires careful food safety handling. For backyard BBQ, hot smoked is the way to go.'}]},
+  {title:'Lamb Shoulder (Low and Slow)',category:'Lamb',temps:[{label:'Pit Temp',val:'250-275 F'},{label:'Wrap At',val:'160 F'},{label:'Pull At',val:'195-200 F'}],sections:[{title:'Prep',steps:[{text:'<strong>Score the fat cap deeply</strong> -- lamb fat is thick and waxy and needs more encouragement to render than pork or beef.'},{text:'<strong>Make small pockets</strong> in the meat with a knife and insert slivers of garlic. Lamb and garlic are a natural combination.'},{text:'<strong>Season with a Mediterranean-inspired rub:</strong> kosher salt, black pepper, cumin, coriander, smoked paprika, dried oregano, and a touch of cinnamon. Apply olive oil as a binder first.'},{text:'<strong>Marinate overnight</strong> in the fridge, uncovered. The salt will penetrate deeply in 12-24 hours.'}]},{title:'The Cook',steps:[{text:'<strong>Smoke at 250-275 F</strong> using oak, hickory, or cherry wood. Avoid mesquite -- it will clash with the lamb flavor.'},{text:'<strong>Expect a long cook</strong> -- similar to pork shoulder. Bone-in shoulder at 5-6 lbs will typically take 8-10 hours.'},{text:'<strong>Spritz with red wine vinegar and water</strong> (50/50) every 90 minutes for bark development and flavor.'},{text:'<strong>Wrap at 160-165 F</strong> in butcher paper. Add a splash of red wine or beef broth inside the wrap.'},{text:'<strong>Cook to 195-200 F</strong> until the probe meets no resistance. The bone should pull cleanly from the meat.'}]},{title:'Rest and Serve',steps:[{text:'<strong>Rest 45-60 minutes</strong> wrapped in towels inside a cooler.'},{text:'<strong>Pull or shred</strong> the meat and drizzle with the accumulated juices from the wrap. Serve with flatbread, mint yogurt sauce, and pickled onions for a Middle Eastern style spread.'}],tip:'<strong>Gamey flavor:</strong> The strong flavor of lamb comes mostly from the fat. Trimming excess fat before cooking and using acid (lemon juice, vinegar, yogurt) in the marinade will dial the gaminess way back.'}]}
+];
+
+const WOODS=[
+  {name:'Hickory',flavor:'Strong, bacon-like, earthy',intensity:'Heavy',meats:['beef','pork','lamb'],avoid:'Fish, delicate poultry',note:'Classic American BBQ wood. Excellent for ribs and shoulders. Can overpower on long smokes -- use sparingly or blend.'},
+  {name:'Mesquite',flavor:'Very bold, earthy, slightly bitter',intensity:'Very Heavy',meats:['beef','lamb'],avoid:'Pork, fish, poultry',note:'Burns hot and intense. Best for short cooks like steaks. Can turn bitter on long smokes.'},
+  {name:'Oak',flavor:'Medium, earthy, wine-barrel notes',intensity:'Medium',meats:['beef','pork','lamb'],avoid:'None',note:'The most versatile BBQ wood. Santa Maria BBQ standard. Balances well with everything.'},
+  {name:'Apple',flavor:'Mild, sweet, fruity',intensity:'Light',meats:['pork','poultry','fish'],avoid:'Heavy beef cuts',note:'Excellent for ribs, chicken, and fish. Can use heavily without overpowering the meat.'},
+  {name:'Cherry',flavor:'Sweet, mild, slightly tart',intensity:'Light',meats:['pork','poultry','beef'],avoid:'Fish',note:'Adds beautiful mahogany color. Blends well with hickory or oak to soften the edge.'},
+  {name:'Peach',flavor:'Very mild, sweet, floral',intensity:'Very Light',meats:['poultry','fish','pork'],avoid:'Beef, lamb',note:'Great for chicken and fish. Usually blended with stronger woods.'},
+  {name:'Pecan',flavor:'Rich, nutty, mellow',intensity:'Medium',meats:['beef','pork','poultry'],avoid:'Fish',note:'Softer, sweeter alternative to hickory. Excellent for brisket and ribs without the harsh edge.'},
+  {name:'Alder',flavor:'Delicate, slightly sweet',intensity:'Very Light',meats:['fish','poultry'],avoid:'Beef, pork, lamb',note:'Pacific Northwest salmon classic. Subtle enough to let the fish flavor lead.'},
+  {name:'Maple',flavor:'Mild, sweet, lightly smoky',intensity:'Light',meats:['pork','poultry'],avoid:'Beef, fish',note:'Great for ham and bacon. Adds sweetness without overpowering.'},
+  {name:'Walnut',flavor:'Strong, bitter, earthy',intensity:'Heavy',meats:['beef','lamb'],avoid:'Fish, poultry, pork',note:'Best blended with milder woods. Very strong on its own -- use as an accent, not primary.'}
+];
+
+function showTab(tab,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+  document.querySelector('.content').scrollTop=0;
+}
+
+function updateCookOptions(){
+  const m=document.getElementById('ct-meat').value;
+  const d=MEAT[m];
+  const ms=document.getElementById('ct-method');
+  Array.from(ms.options).forEach(o=>{
+    const v=o.value;
+    const ok=(v==='smoke'&&d.smokeRate)||(v==='grill'&&d.grillRate)||(v==='reverse'&&d.reverseRate)||(v==='oven'&&d.ovenRate);
+    o.disabled=!ok;
+    o.text=o.text.replace(' (N/A)','')+(!ok?' (N/A)':'');
+  });
+  const first=Array.from(ms.options).find(o=>!o.disabled);
+  if(first)ms.value=first.value;
+  const ds=document.getElementById('ct-doneness');
+  const allowed=d.doneness||['medium-rare','medium','medium-well','well'];
+  Array.from(ds.options).forEach(o=>o.disabled=!allowed.includes(o.value));
+  const fd=Array.from(ds.options).find(o=>!o.disabled);
+  if(fd)ds.value=fd.value;
+  calculateCookTime();
+  renderInlineGuide(m);
+}
+
+function fmt(m){
+  const h=Math.floor(m/60),mn=m%60;
+  return(h>0?h+'hr ':'')+(mn>0?mn+'min':'');
+}
+
+function calculateCookTime(){
+  const meat=document.getElementById('ct-meat').value;
+  const method=document.getElementById('ct-method').value;
+  const wRaw=parseFloat(document.getElementById('ct-weight').value);
+  const unit=document.getElementById('ct-unit').value;
+  const doneness=document.getElementById('ct-doneness').value;
+  const res=document.getElementById('cook-result');
+  if(!wRaw||wRaw<=0){res.classList.remove('show');return;}
+  const wLbs=unit==='kg'?wRaw*2.20462:wRaw;
+  const d=MEAT[meat];
+  const cat=d.cat;
+  const pitTemp=(PIT[method]&&PIT[method][cat])||'--';
+  if(d.setsTime&&d.setsTime[method]){
+    set$('res-pit-temp',pitTemp);
+    set$('res-total-time',d.setsTime[method]);
+    set$('res-pull-temp',(d.pull[method]||'--')+(d.pull[method]?' F':''));
+    set$('res-final-temp',d.final+' F');
+    set$('res-rest',d.rest);
+    set$('res-notes',d.notes||'');
+    document.getElementById('phase-bars').innerHTML='';
+    res.classList.add('show');return;
+  }
+  let pull=d.pull[method];
+  const steak=['ribeye','ny-strip','tri-tip','lamb-chops','lamb-leg','pork-loin','pork-tenderloin','salmon','whole-fish'];
+  if(steak.includes(meat)&&DONENESS[cat]&&DONENESS[cat][doneness])pull=DONENESS[cat][doneness].pull;
+  let rate=null;
+  if(method==='smoke')rate=d.smokeRate;
+  if(method==='grill')rate=d.grillRate;
+  if(method==='reverse')rate=d.reverseRate;
+  if(method==='oven')rate=d.ovenRate;
+  if(!rate){res.classList.remove('show');return;}
+  const total=Math.round(wLbs*rate*60);
+  const lo=Math.round(total*.85),hi=Math.round(total*1.15);
+  set$('res-pit-temp',pitTemp);
+  set$('res-total-time',fmt(lo)+' - '+fmt(hi));
+  set$('res-pull-temp',(pull||'--')+(pull?' F':''));
+  set$('res-final-temp',d.final+' F');
+  set$('res-rest',d.rest);
+  set$('res-notes',d.notes||'');
+  const pb=document.getElementById('phase-bars');
+  let phases=[];
+  if(method==='smoke'&&cat!=='fish'&&cat!=='poultry'){
+    phases=[{l:'Building Bark',p:35,c:'#c07010'},{l:'The Stall -- wrap here',p:35,c:'#b84f10'},{l:'Push to Pull Temp',p:20,c:'#e0a040'},{l:'Rest',p:10,c:'#27ae60'}];
+  }else if(method==='reverse'){
+    phases=[{l:'Low and Slow',p:75,c:'#c07010'},{l:'High-Heat Sear',p:10,c:'#b84f10'},{l:'Rest',p:15,c:'#27ae60'}];
+  }
+  pb.innerHTML=phases.length?`<div class="phase-section"><div class="phase-title">Phase Breakdown</div>`+phases.map(p=>`<div class="phase-wrap"><div class="phase-label"><span>${p.l}</span><span>${p.p}%</span></div><div class="phase-bar"><div class="phase-fill" style="width:${p.p}%;background:${p.c}"></div></div></div>`).join('')+'</div>':'';
+  res.classList.add('show');
+}
+
+function set$(id,v){document.getElementById(id).textContent=v;}
+
+function renderTemps(){
+  document.getElementById('temp-grid').innerHTML=TEMPS.map(t=>`
+    <div class="temp-card">
+      <div class="meat-name">${t.name}</div>
+      <div class="temp-row"><span>USDA Safe</span><span class="temp-safe">${t.safe} F</span></div>
+      <div class="temp-row"><span>Pull Off Heat</span><span class="temp-pull">${t.pull} F</span></div>
+      <div class="temp-row"><span>Serve Target</span><span class="temp-target">${t.target} F</span></div>
+      <div class="temp-note">${t.note}</div>
+    </div>`).join('');
+}
+
+function calculateSalt(){
+  const wRaw=parseFloat(document.getElementById('salt-weight').value);
+  const unit=document.getElementById('salt-unit').value;
+  const method=document.getElementById('salt-method').value;
+  const meat=document.getElementById('salt-meat').value;
+  const res=document.getElementById('salt-result');
+  if(!wRaw||wRaw<=0){res.classList.remove('show');return;}
+  const wLbs=unit==='kg'?wRaw*2.20462:wRaw;
+  const wKg=unit==='kg'?wRaw:wRaw/2.20462;
+  const wr=document.getElementById('brine-water-row');
+  const rr=document.getElementById('brine-ratio-row');
+  let saltAmt='',saltType='',water='',time='',ratio='',notes='';
+  if(method==='dry-rub'){
+    saltAmt=`${(wLbs*.5).toFixed(1)}-${(wLbs*.75).toFixed(1)} tsp (${(wLbs*2.8).toFixed(0)}-${(wLbs*4.2).toFixed(0)}g)`;
+    saltType='Diamond Crystal kosher salt';
+    time='Apply 30 min - 2 hrs before cook';
+    notes='Apply evenly and let sit uncovered so the salt draws moisture back in and forms a pellicle. On thick cuts, apply the night before for deeper penetration.';
+    wr.style.display='none';rr.style.display='none';
+  }else if(method==='dry-brine'){
+    const sg=(wKg*1000*.005).toFixed(1);
+    saltAmt=`${sg}g / ${(sg/28.35).toFixed(2)} oz / approx ${(sg/5.7).toFixed(1)} tsp`;
+    saltType='Diamond Crystal kosher (preferred)';
+    water='None (dry)';ratio='0.5% of meat weight';
+    time=meat.includes('whole')?'24-72 hrs':meat==='fish'?'30 min - 2 hrs':meat.includes('thick')?'12-48 hrs':'1-24 hrs';
+    notes='Salt draws moisture out, then reabsorbs carrying salt into the meat. Rest uncovered in fridge for best bark and pellicle development.';
+    wr.style.display='';rr.style.display='';
+  }else if(method==='wet-brine'){
+    const gals=meat.includes('whole')?Math.ceil(wLbs/4):Math.ceil(wLbs/8);
+    saltAmt=`${gals} cup${gals>1?'s':''} (approx ${(gals*240).toFixed(0)}g)`;
+    saltType='Kosher salt';
+    water=`${gals} gallon${gals>1?'s':''} (${(gals*3.785).toFixed(1)} liters)`;
+    ratio='1 cup salt per gallon (approx 3.5%)';
+    time=meat.includes('whole')?'12-24 hrs poultry, 24-48 hrs large cuts':meat==='fish'?'30-60 min only':'4-12 hrs';
+    notes='Keep refrigerated. Rinse thoroughly and pat dry after brining. Do NOT add more salt when seasoning.';
+    wr.style.display='';rr.style.display='';
+  }else{
+    const sg=(wKg*1000*.01).toFixed(1);
+    saltAmt=`${sg}g / approx ${(sg/5.7).toFixed(1)} tsp per 100ml injection`;
+    saltType='Fine sea salt or canning salt (dissolves fully)';
+    water=`Approx ${(wLbs*1.5).toFixed(1)} oz total for ${wLbs.toFixed(1)} lb meat`;
+    ratio='1% salt by injection liquid weight';
+    time='Inject 1-12 hrs before cook';
+    notes='Inject at an angle, moving needle while pressing plunger. Multiple sites for even distribution. Add butter, apple juice, or Worcestershire to the brine for extra flavor.';
+    wr.style.display='';rr.style.display='';
+  }
+  set$('res-salt-amount',saltAmt);set$('res-salt-type',saltType);
+  set$('res-brine-water',water);set$('res-brine-time',time);
+  set$('res-brine-ratio',ratio);set$('salt-notes',notes);
+  res.classList.add('show');
+}
+
+const GUIDE_MAP={
+  'brisket':0,'brisket-flat':0,'chuck-roast':0,
+  'pork-shoulder':1,'pork-loin':1,'pork-tenderloin':1,
+  'spare-ribs':2,'baby-back':2,
+  'ribeye':3,'ny-strip':3,'tri-tip':3,'beef-ribs':3,'beef-short-ribs':3,
+  'whole-chicken':4,'chicken-thighs':4,'chicken-breast':4,'whole-turkey':4,'turkey-breast':4,
+  'pork-belly':5,
+  'salmon':6,'whole-fish':6,
+  'lamb-shoulder':7,'lamb-leg':7,'lamb-chops':7
+};
+
+function buildGuideHTML(g){
+  const tempsHtml=`<div class="guide-temps">${g.temps.map(t=>`<div class="gt-box"><div class="gt-label">${t.label}</div><div class="gt-val">${t.val}</div></div>`).join('')}</div>`;
+  const sectionsHtml=g.sections.map(s=>{
+    const stepsHtml=s.steps.map((st,si)=>`<div class="guide-step"><div class="step-num">${si+1}</div><div class="step-text">${st.text}</div></div>`).join('');
+    const tipHtml=s.tip?`<div class="guide-tip">${s.tip}</div>`:'';
+    return`<div class="guide-subtitle">${s.title}</div>${stepsHtml}${tipHtml}`;
+  }).join('');
+  return`<div class="guide-item open" id="inline-guide-item">
+    <button class="guide-header" onclick="document.getElementById('inline-guide-item').classList.toggle('open')">
+      <span>Cook Guide: ${g.title}<br><span style="font-size:.72rem;color:#a08060;font-weight:400">${g.category}</span></span>
+      <span class="guide-arrow">&#9660;</span>
+    </button>
+    <div class="guide-body">${tempsHtml}${sectionsHtml}</div>
+  </div>`;
+}
+
+function renderInlineGuide(meatKey){
+  const el=document.getElementById('inline-guide');
+  const idx=GUIDE_MAP[meatKey];
+  if(idx===undefined){el.innerHTML='';return;}
+  el.innerHTML=buildGuideHTML(GUIDES[idx]);
+}
+
+let woodFilter='all';
+const IC={'Very Light':'#27ae60','Light':'#2ecc71','Medium':'#c07010','Heavy':'#e87c2a','Very Heavy':'#c0392b'};
+
+function filterWood(f,btn){
+  woodFilter=f;
+  document.querySelectorAll('#wood-filters .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWood();
+}
+
+function renderWood(){
+  const list=woodFilter==='all'?WOODS:WOODS.filter(w=>w.meats.includes(woodFilter));
+  document.getElementById('wood-grid').innerHTML=list.map(w=>`
+    <div class="wood-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <div class="wood-name">${w.name}</div>
+        <span class="intensity-pill" style="color:${IC[w.intensity]}">${w.intensity}</span>
+      </div>
+      <div class="wood-flavor">${w.flavor}</div>
+      <div class="wood-section-label">Best With</div>
+      <div>${w.meats.map(m=>`<span class="tag">${m}</span>`).join('')}</div>
+      <div class="wood-section-label">Avoid</div>
+      <div style="font-size:.76rem;color:#a08060;margin-bottom:4px">${w.avoid}</div>
+      <div style="font-size:.74rem;color:#7a5030;line-height:1.4">${w.note}</div>
+    </div>`).join('');
+}
+
+function dismissBanner(){
+  document.getElementById('install-banner').style.display='none';
+  try{localStorage.setItem('bbq-banner','1');}catch(e){}
+}
+try{if(localStorage.getItem('bbq-banner'))document.getElementById('install-banner').style.display='none';}catch(e){}
+
+renderTemps();
+renderWood();
+updateCookOptions();
+</script>
+</body>
+</html>
