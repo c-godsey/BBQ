@@ -100,6 +100,16 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 input[type=number]{-moz-appearance:textfield}
 @media(max-width:400px){nav button{font-size:.58rem;padding:10px 2px 8px}.result-main{font-size:1.6rem}.timer-display{font-size:1.8rem}.row2{grid-template-columns:1fr}}
 @media(hover:none){button,.btn{cursor:default}}
+#fs-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:1000;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#fs-inner{max-width:600px;margin:0 auto;padding:14px 14px calc(32px + env(safe-area-inset-bottom))}
+#fs-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;position:sticky;top:0;background:var(--bg);padding:10px 0 8px;border-bottom:1px solid var(--border);z-index:10}
+#fs-bar h2{font-size:.85rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px}
+#fs-close{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:6px;font-size:.85rem;font-weight:700;cursor:pointer;min-height:44px;min-width:44px}
+#fs-result .result-main{font-size:2.4rem}
+#fs-result .result-card{border-radius:0;border-left:none;border-right:none;margin-top:0}
+#fs-guide-steps{margin-top:14px}
+.fs-guide-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.fs-guide-card h3{font-size:.8rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -107,6 +117,18 @@ input[type=number]{-moz-appearance:textfield}
   <h1>🔥 BBQ Pit Calculator</h1>
   <p>Pellet · Smoke · Grill · Oven</p>
 </header>
+<!-- FULLSCREEN OVERLAY -->
+<div id="fs-overlay">
+  <div id="fs-inner">
+    <div id="fs-bar">
+      <h2>🔥 Cook Summary</h2>
+      <button id="fs-close" onclick="hideFullscreen()">✕ Close</button>
+    </div>
+    <div id="fs-result"></div>
+    <div id="fs-guide-steps"></div>
+  </div>
+</div>
+
 <nav id="nav">
   <button class="active" onclick="showTab('cook',this)">🍖 Cook</button>
   <button onclick="showTab('timer',this)">⏱ Timer</button>
@@ -417,8 +439,8 @@ const MEAT = {
       {v:'bone-in',l:'Bone-In / Skin-On',rateMult:1.25,methods:['pellet','smoke','grill','oven'],notes:'~25% longer cook time but bone protects meat from drying out. Better flavor and juiciness overall.'},
       {v:'boneless',l:'Boneless / Skinless',rateMult:1.0,methods:['pellet','smoke','grill','oven'],notes:'Cooks fastest. Pound to even thickness for consistent doneness across the whole breast.'}
     ]}},
-  'chicken-wings':{name:'Chicken Wings',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.38,smokeRate:.45,grillRate:.15,ovenRate:.32,pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'0 min',notes:'Smoke at 250°F for 1.5 hrs, then crank to 400°F+ for 10–15 min to crisp the skin. Toss in sauce right off the grill.',servingLoss:.15,servingSize:.50},
-  'chicken-drumsticks':{name:'Chicken Drumsticks',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.45,smokeRate:.52,grillRate:.20,ovenRate:.40,pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'5 min',notes:'Slash skin to let smoke and rub penetrate. Cook at 275°F — bone protects meat and adds flavor. Finish hot for crispy skin.',servingLoss:.22,servingSize:.40},
+  'chicken-wings':{name:'Chicken Wings',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',fixedCookMins:{pellet:90,smoke:105,grill:30,oven:50},pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'0 min',notes:'Smoke at 250°F for 1.5 hrs, then crank to 400°F+ for 10–15 min to crisp the skin. Toss in sauce right off the grill.',servingLoss:.15,servingSize:.50},
+  'chicken-drumsticks':{name:'Chicken Drumsticks',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',fixedCookMins:{pellet:75,smoke:90,grill:35,oven:55},pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'5 min',notes:'Slash skin to let smoke and rub penetrate. Cook at 275°F — bone protects meat and adds flavor. Finish hot for crispy skin.',servingLoss:.22,servingSize:.40},
   'whole-turkey':{name:'Whole Turkey',cat:'poultry',methods:['pellet','smoke','oven'],donenessType:'poultry',pelletRate:.52,smokeRate:.60,ovenRate:.48,pull:{pellet:160,smoke:162,oven:160},final:165,rest:'20–30 min',notes:'Spatchcock cuts time in half. Brine 24–48 hrs. Run 300–325°F for crispy skin on pellet.',servingLoss:.38,servingSize:.40},
   'turkey-breast':{name:'Turkey Breast',cat:'poultry',methods:['pellet','smoke','oven'],donenessType:'poultry',pelletRate:.43,smokeRate:.50,ovenRate:.40,pull:{pellet:160,smoke:160,oven:160},final:165,rest:'15 min',notes:'Best smoked turkey option for smaller groups. Brine overnight. Compound butter under the skin.',servingLoss:.28,servingSize:.40,
     boneOpts:{default:'bone-in',options:[
@@ -697,9 +719,16 @@ function calculateCookTime(){
     else if(amb>=100)ambF=0.90;
     if(windy)ambF*=1.10;
   }
-  const rate=d[method+'Rate'];
-  if(!rate){res.style.display='none';return;}
-  const total=Math.round(wLbs*rate*boneMult*ambF*60);
+  let total;
+  if(d.fixedCookMins){
+    const base=d.fixedCookMins[method];
+    if(!base){res.style.display='none';return;}
+    total=Math.round(base*ambF);
+  } else {
+    const rate=d[method+'Rate'];
+    if(!rate){res.style.display='none';return;}
+    total=Math.round(wLbs*rate*boneMult*ambF*60);
+  }
   const lo=Math.round(total*.85),hi=Math.round(total*1.15);
   let pullT='—',finalT='—';
   if(d.pull&&d.pull[method])pullT=d.pull[method]+'°F';
@@ -756,7 +785,28 @@ function calculateCookTime(){
     ${d.notes?`<div class="info-note" style="margin-top:12px"><strong>💡 Pit Note:</strong> ${d.notes}</div>`:''}
     ${progressNote}
     <button onclick="loadTimer(${total},'${k}','${dinnerVal}')" style="width:100%;margin-top:12px;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;min-height:44px">⏱ Set Timer &amp; Start Cook</button>
+    <button onclick="showFullscreen()" style="width:100%;margin-top:8px;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;min-height:44px">⛶ Full Screen View</button>
   </div>`;
+}
+
+function showFullscreen(){
+  const k=document.getElementById('ct-meat').value;
+  const resultEl=document.getElementById('ct-result');
+  if(resultEl.style.display==='none'||!resultEl.innerHTML)return;
+  document.getElementById('fs-result').innerHTML=resultEl.innerHTML;
+  const idx=GUIDE_MAP[k];
+  let guideHtml='';
+  if(idx!==undefined){
+    const g=GUIDES[idx];
+    guideHtml=`<div class="fs-guide-card"><h3>📋 ${g.title}</h3>${g.steps.map((s,i)=>`<div class="guide-step"><div class="step-num">${i+1}</div><div class="step-body"><h4>${s.t}</h4><p>${s.d}</p></div></div>`).join('')}</div>`;
+  }
+  document.getElementById('fs-guide-steps').innerHTML=guideHtml;
+  document.getElementById('fs-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function hideFullscreen(){
+  document.getElementById('fs-overlay').style.display='none';
+  document.body.style.overflow='';
 }
 
 function renderGuide(k){
