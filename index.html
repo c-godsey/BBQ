@@ -145,6 +145,8 @@ input[type=number]{-moz-appearance:textfield}
           <option value="whole-chicken">Whole Chicken</option>
           <option value="chicken-thighs">Chicken Thighs</option>
           <option value="chicken-breast">Chicken Breast</option>
+          <option value="chicken-wings">Chicken Wings</option>
+          <option value="chicken-drumsticks">Chicken Drumsticks</option>
           <option value="whole-turkey">Whole Turkey</option>
           <option value="turkey-breast">Turkey Breast</option>
         </optgroup>
@@ -415,6 +417,8 @@ const MEAT = {
       {v:'bone-in',l:'Bone-In / Skin-On',rateMult:1.25,methods:['pellet','smoke','grill','oven'],notes:'~25% longer cook time but bone protects meat from drying out. Better flavor and juiciness overall.'},
       {v:'boneless',l:'Boneless / Skinless',rateMult:1.0,methods:['pellet','smoke','grill','oven'],notes:'Cooks fastest. Pound to even thickness for consistent doneness across the whole breast.'}
     ]}},
+  'chicken-wings':{name:'Chicken Wings',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.38,smokeRate:.45,grillRate:.15,ovenRate:.32,pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'0 min',notes:'Smoke at 250°F for 1.5 hrs, then crank to 400°F+ for 10–15 min to crisp the skin. Toss in sauce right off the grill.',servingLoss:.15,servingSize:.50},
+  'chicken-drumsticks':{name:'Chicken Drumsticks',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.45,smokeRate:.52,grillRate:.20,ovenRate:.40,pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'5 min',notes:'Slash skin to let smoke and rub penetrate. Cook at 275°F — bone protects meat and adds flavor. Finish hot for crispy skin.',servingLoss:.22,servingSize:.40},
   'whole-turkey':{name:'Whole Turkey',cat:'poultry',methods:['pellet','smoke','oven'],donenessType:'poultry',pelletRate:.52,smokeRate:.60,ovenRate:.48,pull:{pellet:160,smoke:162,oven:160},final:165,rest:'20–30 min',notes:'Spatchcock cuts time in half. Brine 24–48 hrs. Run 300–325°F for crispy skin on pellet.',servingLoss:.38,servingSize:.40},
   'turkey-breast':{name:'Turkey Breast',cat:'poultry',methods:['pellet','smoke','oven'],donenessType:'poultry',pelletRate:.43,smokeRate:.50,ovenRate:.40,pull:{pellet:160,smoke:160,oven:160},final:165,rest:'15 min',notes:'Best smoked turkey option for smaller groups. Brine overnight. Compound butter under the skin.',servingLoss:.28,servingSize:.40,
     boneOpts:{default:'bone-in',options:[
@@ -561,7 +565,7 @@ const GUIDE_MAP = {
   'pork-shoulder':1,'pork-loin':1,'pork-tenderloin':1,
   'spare-ribs':2,'baby-back':2,
   'ribeye':3,'ny-strip':3,'tri-tip':3,'beef-ribs':3,'beef-short-ribs':3,
-  'whole-chicken':4,'chicken-thighs':4,'chicken-breast':4,'whole-turkey':4,'turkey-breast':4,
+  'whole-chicken':4,'chicken-thighs':4,'chicken-breast':4,'chicken-wings':4,'chicken-drumsticks':4,'whole-turkey':4,'turkey-breast':4,
   'pork-belly':5,
   'salmon':6,'whole-fish':6,
   'lamb-shoulder':7,
@@ -577,6 +581,7 @@ const MEAT_STYLES = {
   'spare-ribs':'ribs321','baby-back':'ribs221',
   'ribeye':'steak','ny-strip':'steak','tri-tip':'steak','lamb-chops':'steak',
   'whole-chicken':'poultry','chicken-thighs':'poultry','chicken-breast':'poultry',
+  'chicken-wings':'poultry','chicken-drumsticks':'poultry',
   'whole-turkey':'poultry','turkey-breast':'poultry'
 };
 function meatStyleFor(k){return MEAT_STYLES[k]||'simple';}
