@@ -110,6 +110,17 @@ input[type=number]{-moz-appearance:textfield}
 #fs-guide-steps{margin-top:14px}
 .fs-guide-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
 .fs-guide-card h3{font-size:.8rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.style-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.style-name{font-size:.95rem;font-weight:700;color:var(--text)}
+.style-region{font-size:.72rem;color:var(--muted);margin-top:2px}
+.style-row{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;border-bottom:1px solid rgba(74,48,32,.3);font-size:.8rem;gap:8px}
+.style-row:last-child{border-bottom:none}
+.style-label{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:.68rem;letter-spacing:.3px;flex-shrink:0;padding-top:1px}
+.style-tip{margin-top:10px;font-size:.78rem;color:#d4a060;background:rgba(232,120,32,.08);border:1px solid rgba(232,120,32,.2);border-radius:6px;padding:8px 10px;line-height:1.45}
+.stall-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.stall-option{background:var(--surface2);border-radius:8px;padding:10px;border:1px solid var(--border)}
+.stall-option h4{font-size:.8rem;font-weight:700;margin-bottom:6px}
+.stall-option p{font-size:.75rem;color:var(--muted);line-height:1.4}
 </style>
 </head>
 <body>
@@ -136,6 +147,7 @@ input[type=number]{-moz-appearance:textfield}
   <button onclick="showTab('salt',this)">🧂 Salt</button>
   <button onclick="showTab('rubs',this)">🌶 Rubs</button>
   <button onclick="showTab('wood',this)">🪵 Wood</button>
+  <button onclick="showTab('styles',this)">🌎 Styles</button>
 </nav>
 
 <!-- COOK TAB -->
@@ -154,6 +166,7 @@ input[type=number]{-moz-appearance:textfield}
           <option value="tri-tip">Tri-Tip</option>
           <option value="beef-ribs">Beef Back Ribs</option>
           <option value="beef-short-ribs">Beef Short Ribs (Plate)</option>
+          <option value="smoked-burgers">Smoked Burgers</option>
         </optgroup>
         <optgroup label="— Pork —">
           <option value="pork-shoulder">Pork Shoulder / Butt</option>
@@ -180,6 +193,7 @@ input[type=number]{-moz-appearance:textfield}
         <optgroup label="— Seafood —">
           <option value="salmon">Salmon Fillet</option>
           <option value="whole-fish">Whole Fish</option>
+          <option value="shrimp">Wild Shrimp</option>
         </optgroup>
       </select>
     </div>
@@ -257,6 +271,7 @@ input[type=number]{-moz-appearance:textfield}
         <option value="lowslow">Low &amp; Slow (wrap at 55%)</option>
         <option value="ribs321">Ribs 3-2-1 Method</option>
         <option value="ribs221">Ribs 2-2-1 (Baby Back)</option>
+        <option value="ribs211">Ribs 2-1-1 (Firmer Bite)</option>
         <option value="steak">Steak (smoke + sear + rest)</option>
         <option value="poultry">Poultry (low then high heat)</option>
         <option value="simple">Simple (single phase)</option>
@@ -285,6 +300,22 @@ input[type=number]{-moz-appearance:textfield}
       <thead><tr><th>Cut</th><th>Pull °F</th><th>Final °F</th><th>Rest</th></tr></thead>
       <tbody id="temp-tbody"></tbody>
     </table>
+  </div>
+  <div class="card">
+    <h3>🥩 The Stall — What To Do</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:4px">Temp plateaus at 150–170°F for hours during low & slow cooks. This is normal — collagen is converting to gelatin.</p>
+    <div class="stall-grid">
+      <div class="stall-option">
+        <h4 style="color:var(--accent)">🕐 Ride It Out</h4>
+        <p>Maximum bark development. Deeper smoke penetration. For brisket purists — do this.</p>
+        <p style="margin-top:6px;color:var(--amber)">Add 2–4 hrs to your cook window.</p>
+      </div>
+      <div class="stall-option">
+        <h4 style="color:var(--blue)">📦 Wrap It</h4>
+        <p>Butcher paper: pushes through stall while preserving most bark texture.<br>Foil: fastest option, softens bark, adds moisture.</p>
+        <p style="margin-top:6px;color:var(--green)">Saves 1–3 hrs of cook time.</p>
+      </div>
+    </div>
   </div>
   <div class="card">
     <h3>🔥 Pit Temperatures</h3>
@@ -370,6 +401,15 @@ input[type=number]{-moz-appearance:textfield}
   <div id="rb-list"></div>
 </div>
 
+<!-- STYLES TAB -->
+<div id="tab-styles" class="tab">
+  <div class="card" style="margin-bottom:4px">
+    <h3>🌎 Regional BBQ Styles</h3>
+    <p style="font-size:.78rem;color:var(--muted)">Regional traditions — rubs, woods, and technique presets.</p>
+  </div>
+  <div id="styles-list"></div>
+</div>
+
 <!-- WOOD TAB -->
 <div id="tab-wood" class="tab">
   <div class="card">
@@ -393,7 +433,8 @@ const DONENESS_SETS = {
   'salmon':     [{v:'rare',l:'Translucent / Rare (120°F)'},{v:'medium',l:'Flaky / Medium (130°F)'},{v:'well',l:'Fully Cooked (145°F)'}],
   'fish':       [{v:'well',l:'Fully Cooked (145°F)'}],
   'lamb-roast': [{v:'med-rare',l:'Med-Rare (130°F)'},{v:'medium',l:'Medium (140°F)'},{v:'med-well',l:'Med-Well (150°F)'},{v:'well',l:'Well Done (160°F)'}],
-  'lamb-chop':  [{v:'rare',l:'Rare (125°F)'},{v:'med-rare',l:'Med-Rare (130°F)'},{v:'medium',l:'Medium (140°F)'}]
+  'lamb-chop':  [{v:'rare',l:'Rare (125°F)'},{v:'med-rare',l:'Med-Rare (130°F)'},{v:'medium',l:'Medium (140°F)'}],
+  'burger':     [{v:'well',l:'Well Done / Food Safe (160°F)'}]
 };
 
 const DONENESS_TEMPS = {
@@ -404,7 +445,8 @@ const DONENESS_TEMPS = {
   'salmon':{rare:{pull:115,final:120},medium:{pull:125,final:130},well:{pull:140,final:145}},
   'fish':{well:{pull:140,final:145}},
   'lamb-roast':{'med-rare':{pull:125,final:130},medium:{pull:133,final:140},'med-well':{pull:145,final:150},well:{pull:158,final:165}},
-  'lamb-chop':{rare:{pull:120,final:125},'med-rare':{pull:125,final:130},medium:{pull:133,final:140}}
+  'lamb-chop':{rare:{pull:120,final:125},'med-rare':{pull:125,final:130},medium:{pull:133,final:140}},
+  'burger':{well:{pull:155,final:160}}
 };
 
 const ML = {pellet:'Pellet Grill',smoke:'Offset / Charcoal',grill:'Direct Grill',reverse:'Reverse Sear',oven:'Oven Roast'};
@@ -430,7 +472,7 @@ const MEAT = {
   'pork-loin':{name:'Pork Loin',cat:'pork',methods:['pellet','smoke','grill','reverse','oven'],donenessType:'pork-loin',pelletRate:.35,smokeRate:.40,grillRate:.17,reverseRate:.40,ovenRate:.33,pull:{pellet:140,smoke:140,grill:140,reverse:140,oven:140},final:145,rest:'10 min',notes:'Very lean — don\'t overcook. Wrap in bacon to add fat or brine overnight.',servingLoss:.15,servingSize:.35},
   'pork-tenderloin':{name:'Pork Tenderloin',cat:'pork',methods:['pellet','smoke','grill','reverse','oven'],donenessType:'pork-loin',pelletRate:.30,smokeRate:.35,grillRate:.15,reverseRate:.35,ovenRate:.28,pull:{pellet:140,smoke:140,grill:140,reverse:140,oven:140},final:145,rest:'5 min',notes:'Cooks fast. Silver skin must be removed before cooking. Butterfly for faster, even heat.',servingLoss:.12,servingSize:.33},
   'spare-ribs':{name:'Spare Ribs / St. Louis',cat:'pork',methods:['pellet','smoke'],donenessType:'low-slow',pelletRate:.52,smokeRate:.60,pull:{pellet:195,smoke:200},final:203,rest:'15 min',notes:'3-2-1 method: 3 hrs smoke, 2 hrs wrapped, 1 hr sauced. Probe slides between bones at 195°F.',servingLoss:.45,servingSize:.5},
-  'baby-back':{name:'Baby Back Ribs',cat:'pork',methods:['pellet','smoke'],donenessType:'low-slow',pelletRate:.43,smokeRate:.50,pull:{pellet:195,smoke:195},final:200,rest:'10 min',notes:'2-2-1 method. Thinner than spare ribs — watch for drying out. Bend test: cracks form when done.',servingLoss:.40,servingSize:.5},
+  'baby-back':{name:'Baby Back Ribs',cat:'pork',methods:['pellet','smoke'],donenessType:'low-slow',pelletRate:.43,smokeRate:.50,pull:{pellet:195,smoke:195},final:200,rest:'10 min',notes:'2-2-1 for fall-off-the-bone; 2-1-1 for firmer competition bite. Thinner than spare ribs — watch for drying out. Bend test: cracks form when done.',servingLoss:.40,servingSize:.5},
   'pork-belly':{name:'Pork Belly',cat:'pork',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,ovenRate:.9,pull:{pellet:195,smoke:200,oven:200},final:200,rest:'20 min',notes:'Score fat cap in 1" crosshatch. Cube for burnt ends or keep whole for thick bacon slices.',servingLoss:.35,servingSize:.33},
   'whole-chicken':{name:'Whole Chicken',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.58,smokeRate:.67,grillRate:.28,ovenRate:.52,pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'10 min',notes:'Spatchcock to cut time in half. Run pit at 300°F+ for crispy skin on pellet grills.',servingLoss:.35,servingSize:.40},
   'chicken-thighs':{name:'Chicken Thighs',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.50,smokeRate:.57,grillRate:.22,ovenRate:.45,pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'5 min',notes:'Most forgiving poultry cut. 275°F for smoke ring, then crank heat for crispy skin finish.',servingLoss:.25,servingSize:.35},
@@ -455,7 +497,9 @@ const MEAT = {
   'lamb-shoulder':{name:'Lamb Shoulder',cat:'lamb',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,ovenRate:.87,pull:{pellet:195,smoke:200,oven:200},final:203,rest:'30 min',notes:'The lamb equivalent of pork shoulder. Pulls beautifully. Middle Eastern spices work incredibly well.',servingLoss:.35,servingSize:.40},
   'lamb-chops':{name:'Lamb Chops / Rack',cat:'lamb',methods:['pellet','smoke','grill','reverse'],donenessType:'lamb-chop',pelletRate:.22,smokeRate:.25,grillRate:.10,reverseRate:.30,pull:{pellet:125,smoke:125,grill:125,reverse:125},final:130,rest:'5 min',notes:'Medium-rare is ideal. High heat sear for crust. Frenched rack makes great presentation.',servingLoss:.30,servingSize:.45},
   'salmon':{name:'Salmon Fillet',cat:'seafood',methods:['pellet','smoke','grill'],donenessType:'salmon',pelletRate:.22,smokeRate:.25,grillRate:.12,pull:{pellet:115,smoke:115,grill:120},final:125,rest:'3 min',notes:'Start skin-side down. Cedar plank adds great flavor on pellet/grill. 225°F for low smoke.',servingLoss:.10,servingSize:.35},
-  'whole-fish':{name:'Whole Fish',cat:'seafood',methods:['pellet','smoke','grill'],donenessType:'fish',pelletRate:.30,smokeRate:.35,grillRate:.15,pull:{pellet:140,smoke:140,grill:140},final:145,rest:'5 min',notes:'Score the flesh 3x per side. Stuff cavity with lemon, herbs, and garlic for great aroma.',servingLoss:.50,servingSize:.33}
+  'whole-fish':{name:'Whole Fish',cat:'seafood',methods:['pellet','smoke','grill'],donenessType:'fish',pelletRate:.30,smokeRate:.35,grillRate:.15,pull:{pellet:140,smoke:140,grill:140},final:145,rest:'5 min',notes:'Score the flesh 3x per side. Stuff cavity with lemon, herbs, and garlic for great aroma.',servingLoss:.50,servingSize:.33},
+  'smoked-burgers':{name:'Smoked Burgers',cat:'beef',methods:['pellet','smoke','grill'],donenessType:'burger',fixedCookMins:{pellet:45,smoke:50,grill:18},pull:{pellet:155,smoke:155,grill:155},final:160,rest:'3 min',notes:'Smoke at 225°F for 30 min to build smoke ring, then crank to 500°F+ and sear 2–3 min per side. Don\'t press the patty. Ground beef MUST reach 160°F.',servingLoss:.20,servingSize:.25},
+  'shrimp':{name:'Wild Shrimp',cat:'seafood',methods:['grill','pellet'],donenessType:'fish',fixedCookMins:{grill:6,pellet:8},pull:{grill:115,pellet:115},final:120,rest:'0 min',notes:'Use a perforated grill pan at 450°F. Pull when they curl into a C shape and turn opaque — a tight O = overcooked.',servingLoss:.05,servingSize:.25}
 };
 
 const TEMP_TABLE = [
@@ -475,6 +519,8 @@ const TEMP_TABLE = [
   {cut:'Lamb Chops (med-rare)',pull:'125°F',final:'130°F',rest:'5 min'},
   {cut:'Salmon (medium)',pull:'125°F',final:'130°F',rest:'3 min'},
   {cut:'Whole Fish',pull:'140°F',final:'145°F',rest:'5 min'},
+  {cut:'Smoked Burgers',pull:'155°F',final:'160°F',rest:'3 min'},
+  {cut:'Wild Shrimp',pull:'115°F',final:'120°F',rest:'0 min'},
 ];
 
 const RUBS = [
@@ -485,6 +531,9 @@ const RUBS = [
   {name:'Chicken & Turkey Rub',tags:'Poultry',ings:[{n:'Kosher Salt',perLb:.5,unit:'tsp'},{n:'Smoked Paprika',perLb:.4,unit:'tsp'},{n:'Garlic Powder',perLb:.3,unit:'tsp'},{n:'Onion Powder',perLb:.2,unit:'tsp'},{n:'Dried Thyme',perLb:.15,unit:'tsp'},{n:'Black Pepper',perLb:.2,unit:'tsp'},{n:'Brown Sugar',perLb:.25,unit:'tsp'}],notes:'Get rub under the skin for maximum flavor penetration.'},
   {name:'Smoked Salmon Rub',tags:'Seafood · Salmon',ings:[{n:'Brown Sugar',perLb:1.0,unit:'tsp'},{n:'Kosher Salt',perLb:.5,unit:'tsp'},{n:'Dried Dill',perLb:.3,unit:'tsp'},{n:'Lemon Zest',perLb:.25,unit:'tsp'},{n:'Black Pepper',perLb:.2,unit:'tsp'},{n:'Garlic Powder',perLb:.15,unit:'tsp'}],notes:'Sugar creates lacquer glaze. Dry brine 30 min before smoking.'},
   {name:'Mediterranean Lamb Rub',tags:'Lamb · Leg · Chops · Shoulder',ings:[{n:'Kosher Salt',perLb:.5,unit:'tsp'},{n:'Cumin',perLb:.35,unit:'tsp'},{n:'Coriander',perLb:.3,unit:'tsp'},{n:'Smoked Paprika',perLb:.3,unit:'tsp'},{n:'Dried Oregano',perLb:.25,unit:'tsp'},{n:'Garlic Powder',perLb:.25,unit:'tsp'},{n:'Black Pepper',perLb:.2,unit:'tsp'},{n:'Cinnamon',perLb:.05,unit:'tsp'}],notes:'Earthy, aromatic spice blend. Pairs with yogurt-mint sauce and couscous.'},
+  {name:'Texas Dalmatian Rub',tags:'Beef · Brisket · Steaks',ings:[{n:'Coarse Kosher Salt',perLb:.5,unit:'tsp'},{n:'16-Mesh Black Pepper',perLb:.5,unit:'tsp'}],notes:'Equal parts salt and pepper. The purist\'s brisket rub from central Texas. No sugar, no garlic — let the beef speak.'},
+  {name:'Carolina Sweet & Tangy Rub',tags:'Pork · Ribs · Shoulder',ings:[{n:'Kosher Salt',perLb:.4,unit:'tsp'},{n:'Brown Sugar',perLb:.5,unit:'tsp'},{n:'Smoked Paprika',perLb:.35,unit:'tsp'},{n:'Cayenne',perLb:.05,unit:'tsp'},{n:'Black Pepper',perLb:.25,unit:'tsp'}],notes:'Mop every 45 min with apple cider vinegar during the cook. The sweetness caramelizes into a sticky bark.'},
+  {name:'Santa Maria Rub',tags:'Beef · Tri-Tip · Lamb',ings:[{n:'Kosher Salt',perLb:.5,unit:'tsp'},{n:'Black Pepper',perLb:.4,unit:'tsp'},{n:'Garlic Powder',perLb:.3,unit:'tsp'},{n:'Dried Parsley',perLb:.2,unit:'tsp'}],notes:'The classic Central California coast rub. Simple and bold. Apply 1 hr before cook over a red oak fire.'},
 ];
 
 const WOODS = [
@@ -498,6 +547,7 @@ const WOODS = [
   {name:'Alder',smoke:'Light',pairs:'Salmon, Seafood, Chicken',desc:'Delicate, slightly sweet. Pacific Northwest standard for salmon. Won\'t overwhelm mild proteins.'},
   {name:'Maple',smoke:'Mild',pairs:'Turkey, Chicken, Pork',desc:'Subtly sweet, clean smoke. Works well with poultry for a light, slightly sweet smoke profile.'},
   {name:'Peach',smoke:'Mild',pairs:'Pork Ribs, Ham, Poultry',desc:'Light and sweet. Excellent Southern-style wood for pork. Pairs well with cherry or hickory blends.'},
+  {name:'Plum',smoke:'Mild',pairs:'Pork, Chicken, Asian BBQ Glazes',desc:'Delicate with a subtle fruity note. Traditional in Asian BBQ. Pairs beautifully with gochujang and soy-glazed meats.'},
 ];
 
 const GUIDES = [
@@ -505,24 +555,27 @@ const GUIDES = [
     {t:'Trim & Prep',d:'Trim fat cap to ¼". Remove hard fat nodes. Apply rub on cold meat for best bark adhesion. Dry brine 12–24 hrs for optimal crust.'},
     {t:'Fire Up',d:'Target 225–250°F. Use oak or post oak. Allow 45 min for pit temp to stabilize before loading the meat.'},
     {t:'Initial Smoke',d:'Cook unwrapped until internal hits 160–170°F. This builds bark — usually 5–8 hrs. Don\'t rush this phase. No peeking.'},
-    {t:'Wrap (Texas Crutch)',d:'Wrap in butcher paper once bark is set. Add a pat of tallow or butter inside the wrap for moisture. Butcher paper > foil for bark texture.'},
+    {t:'The Stall',d:'At 150–165°F temp plateaus for hours — collagen converting to gelatin. Normal. Two choices: ride it out for maximum bark, or wrap in butcher paper to push through faster. Foil pushes through fastest but softens bark.'},
+    {t:'Wrap (Texas Crutch)',d:'Wrap in butcher paper once bark is fully set. Add a pat of tallow or butter inside the wrap for moisture. Butcher paper > foil for bark texture.'},
     {t:'Probe Tender Finish',d:'Continue to 195–205°F. Temp is secondary — the probe must slide in like warm butter with zero resistance.'},
     {t:'Rest',d:'Rest wrapped in a dry cooler with towels for 1–4 hrs. Redistributes juices and finishes cooking. Never skip this step.'},
   ]},
   {title:'Pork Shoulder / Pulled Pork',steps:[
     {t:'Prep',d:'Trim excess fat but leave ¼" cap. Inject with apple juice + butter + salt for moisture. Rub generously — get into all crevices.'},
     {t:'Smoke',d:'225°F fat side up. Apple, cherry, or hickory wood. The fat cap bastes the meat as it renders down slowly.'},
+    {t:'Mop Every 45 Min',d:'Starting at the 2-hr mark, spray or mop with apple cider vinegar every 45 min. ACV tenderizes the bark, adds tang, and keeps the surface moist without steaming the meat.'},
     {t:'The Stall',d:'Expect a stall at 150–170°F where temp plateaus for hours. Normal — collagen converts to gelatin. Stay the course or wrap to push through.'},
     {t:'Wrap',d:'At 165°F wrap in foil with a splash of apple cider vinegar. Crank to 275°F to power through the stall.'},
     {t:'Pull',d:'At 200–205°F it should shred with finger pressure. The bone pulls out clean with zero resistance.'},
     {t:'Rest & Shred',d:'Rest 30–60 min. Shred while warm. Mix in pan juices and light sauce. Serve the money muscle as a whole piece separately.'},
   ]},
-  {title:'Ribs — 3-2-1 / 2-2-1 Method',steps:[
+  {title:'Ribs — 3-2-1 / 2-2-1 / 2-1-1 Method',steps:[
     {t:'Prep',d:'Remove membrane from bone side — paper towel for grip. Trim flap meat. Apply yellow mustard as binder, rub generously. Rest 1 hr min.'},
-    {t:'Phase 1: Smoke',d:'225°F bone-side down. 3 hrs spare ribs, 2 hrs baby backs. No peeking. Smoke penetration happens now.'},
-    {t:'Phase 2: Wrap',d:'Wrap in foil with brown sugar, honey, and butter. Return bone-side up. 2 hrs for both styles. Tenderizes and adds moisture.'},
+    {t:'Which Method?',d:'Spare ribs / St. Louis: use 3-2-1 (6 hrs). Baby backs, fall-off-the-bone: use 2-2-1 (5 hrs). Baby backs, firmer competition bite: use 2-1-1 (4 hrs) — less time wrapped means less steaming and more chew.'},
+    {t:'Phase 1: Smoke (Unwrapped)',d:'225°F bone-side down. No peeking. Smoke penetration happens in this phase — this is where bark forms and smoke flavor builds.'},
+    {t:'Phase 2: Wrap',d:'Wrap in foil with brown sugar, honey, and butter. Return bone-side up. 2-1-1: wrap only 1 hr for firmer texture. 2-2-1 and 3-2-1: wrap 2 hrs for softer, more tender result.'},
     {t:'Phase 3: Set Sauce',d:'Unwrap, sauce, return 1 hr. Sauce caramelizes and sets. Target 195–200°F internal.'},
-    {t:'Doneness Tests',d:'Bend test: rack bends 45° and bark cracks. Toothpick test: slides between bones with zero resistance.'},
+    {t:'Doneness Tests',d:'Bend test: rack bends 45° and bark cracks. Toothpick test: slides between bones with zero resistance. 2-1-1 ribs will have slightly more resistance — that\'s by design.'},
     {t:'Rest & Slice',d:'Rest 15–20 min. Slice bone-to-bone with a long sharp knife. Serve dry or sauce on the side.'},
   ]},
   {title:'Steak Guide',steps:[
@@ -534,10 +587,11 @@ const GUIDES = [
     {t:'Slice',d:'Slice against the grain at an angle. Finish with flaky sea salt and good olive oil.'},
   ]},
   {title:'Chicken & Turkey Guide',steps:[
-    {t:'Brine',d:'Dry brine 8–24 hrs (chicken) or 24–48 hrs (turkey). Air dry uncovered in fridge last 4 hrs for crispy skin — moisture is the enemy.'},
-    {t:'Prep',d:'Pat very dry. Apply compound butter or herb paste directly on the meat under the skin. Truss whole birds if needed.'},
-    {t:'Low Smoke Phase',d:'Start at 275°F for smoke flavor and color. Pellet grill: 225°F for 1 hr, then crank to 325°F for skin.'},
-    {t:'Crispy Skin Finish',d:'Final stretch at 325–375°F. High heat is the key to crispy skin on a pellet grill.'},
+    {t:'Brine',d:'Dry brine 8–24 hrs (chicken) or 24–48 hrs (turkey). Salt draws moisture out then back in for juicier meat.'},
+    {t:'Crispy Skin Protocol',d:'Non-negotiable: air dry uncovered in fridge 4–24 hrs before cook. Pat completely dry. Moisture is the enemy of crispy skin — even slight dampness = rubbery skin.'},
+    {t:'Prep',d:'Apply compound butter or herb paste directly on the meat under the skin for flavor and moisture. Truss whole birds if needed.'},
+    {t:'Low Smoke Phase',d:'Start at 275°F for smoke flavor and color. Pellet grill: 225°F for 1 hr, then crank to 325°F+ for skin.'},
+    {t:'Crispy Skin Finish',d:'Final 20–25 min at 375°F+. High heat renders remaining fat under the skin and crisps it. This step is mandatory on a pellet grill — don\'t skip it.'},
     {t:'Temperature',d:'Pull breast at 160°F. Check thigh for 165°F+. Carryover brings breast to safe 165°F during rest.'},
     {t:'Rest & Carve',d:'Rest whole birds 15–30 min tented with foil. Remove legs, then wings, then slice breast away from bone and cut against grain.'},
   ]},
@@ -549,7 +603,7 @@ const GUIDES = [
     {t:'Rest & Slice',d:'Rest 20 min. Slice into generous portions showing the fat-meat-fat layers.'},
   ]},
   {title:'Smoked Salmon Guide',steps:[
-    {t:'Brine & Pellicle',d:'Dry brine 30–60 min: brown sugar + salt (3:1) over flesh side. Rinse, air dry 30 min until tacky. This pellicle helps smoke adhere.'},
+    {t:'Cure & Pellicle (Non-Optional)',d:'Dry brine flesh side with brown sugar + kosher salt (3:1 ratio) for 30–60 min. Rinse thoroughly. Then air dry on a rack 30–60 min until surface is tacky. This pellicle is not optional — without it, smoke beads off and the fish looks steamed, not smoked.'},
     {t:'Wood',d:'Alder is traditional. Apple, cherry, and maple also excellent. Avoid heavy woods like hickory or mesquite.'},
     {t:'Smoke',d:'225°F skin side down on oiled grates or cedar plank. Don\'t flip — salmon will flake and stick. Cook undisturbed.'},
     {t:'Temperature',d:'Medium: pull at 125°F for silky texture. Fully cooked: 145°F. Rest 3 min — continues cooking off heat.'},
@@ -580,6 +634,19 @@ const GUIDES = [
     {t:'Rest & Carve',d:'Pull at 120–125°F for rare, 125°F for med-rare. Rest 5 min. Carve rack between every 2 bones for dramatic double-chop portions.'},
     {t:'Sauce',d:'Red wine reduction, mint chimichurri, pomegranate molasses glaze, or simply lemon juice and sea salt flakes.'},
   ]},
+  {title:'Smoked Burgers',steps:[
+    {t:'Form & Season',d:'Use 80/20 ground beef for best results. Form ¼ lb patties, press a thumbprint in the center to prevent bulging. Season liberally with salt and pepper — or a Dalmatian rub.'},
+    {t:'Low Smoke Phase',d:'Smoke at 225°F for 30 min. This builds a smoke ring and infuses flavor. The low temp keeps the burger juicy while smoke penetrates the meat.'},
+    {t:'Sear Finish',d:'Crank pit to 500°F+ (or move to a screaming hot cast iron/griddle). Sear 2–3 min per side for a crust. Don\'t press the patty — you\'ll squeeze out the fat and juices.'},
+    {t:'Food Safety',d:'Ground beef MUST reach 160°F internal. Unlike whole-muscle cuts, grinding disperses surface bacteria throughout. No exceptions — use a probe thermometer.'},
+    {t:'Rest & Build',d:'Rest 3 min. Melt cheese in the final minute of the sear. Build on a toasted bun — top with smoked onions, pickles, and your sauce.'},
+  ]},
+  {title:'Grilled Shrimp',steps:[
+    {t:'Prep',d:'Shell-on or shell-off — shell-on adds more flavor. Devein and dry thoroughly. Toss in oil, garlic, salt, and pepper. Skewer through the tail and head for easy turning.'},
+    {t:'Grill Setup',d:'Use a perforated grill pan or skewers at 450°F+. High direct heat is essential — shrimp cook fast and need the grill to be ripping hot before they go on.'},
+    {t:'Cook',d:'2–3 min per side maximum. Pull when they curl into a C shape and turn pink and opaque. A tight O shape = overcooked and rubbery. Work fast — they go from done to overdone in 30 seconds.'},
+    {t:'Finish',d:'Immediately toss in garlic butter, fresh lemon juice, and parsley off the heat. Serve within 2 minutes — shrimp don\'t hold well.'},
+  ]},
 ];
 
 const GUIDE_MAP = {
@@ -592,7 +659,9 @@ const GUIDE_MAP = {
   'salmon':6,'whole-fish':6,
   'lamb-shoulder':7,
   'lamb-leg':8,
-  'lamb-chops':9
+  'lamb-chops':9,
+  'smoked-burgers':10,
+  'shrimp':11
 };
 
 // Maps meat key → best timer cook style
@@ -602,11 +671,20 @@ const MEAT_STYLES = {
   'beef-ribs':'lowslow','beef-short-ribs':'lowslow','lamb-shoulder':'lowslow',
   'spare-ribs':'ribs321','baby-back':'ribs221',
   'ribeye':'steak','ny-strip':'steak','tri-tip':'steak','lamb-chops':'steak',
+  'smoked-burgers':'steak',
   'whole-chicken':'poultry','chicken-thighs':'poultry','chicken-breast':'poultry',
   'chicken-wings':'poultry','chicken-drumsticks':'poultry',
-  'whole-turkey':'poultry','turkey-breast':'poultry'
+  'whole-turkey':'poultry','turkey-breast':'poultry',
+  'salmon':'simple','whole-fish':'simple','shrimp':'simple'
 };
 function meatStyleFor(k){return MEAT_STYLES[k]||'simple';}
+
+const STYLES = [
+  {name:'Texas Central BBQ',emoji:'🤠',region:'Central Texas',profile:'No sauce, no apologies. Oak smoke, Dalmatian rub, and time. The meat speaks for itself.',wood:'Post Oak / White Oak',temp:'225–250°F',rub:'Equal parts coarse salt + 16-mesh black pepper',technique:'Low & slow, no wrap, no mop — bark development is everything',bestFor:'Brisket, Beef Ribs, Beef Short Ribs',tip:'Don\'t wrap. Let the bark fully form. A great Texas brisket needs no sauce — if you\'re reaching for the bottle, the cook isn\'t done.'},
+  {name:'Carolina Sweet & Tangy',emoji:'🐷',region:'Carolinas',profile:'Vinegar-forward with a sweet bark. Mop mop mop. Pulled pork perfection with bright tang.',wood:'Hickory / Apple',temp:'225°F',rub:'Salt, brown sugar, paprika, cayenne — sweet and spicy',technique:'Mop with ACV every 45 min during the cook for bright, tangy bark',bestFor:'Pork Shoulder, Spare Ribs, Pork Belly',tip:'The ACV mop isn\'t just for flavor — the acid tenderizes the exterior and keeps moisture in without steaming. Don\'t skip it.'},
+  {name:'Santa Maria Style',emoji:'🌾',region:'Central California Coast',profile:'Simple, bold, and over red oak. Tri-tip territory. Salt, pepper, garlic — that\'s the whole playbook.',wood:'Red Oak',temp:'225°F → 500°F (reverse sear)',rub:'Salt, pepper, garlic powder, dried parsley',technique:'Low smoke then rip-hot sear over open red oak fire',bestFor:'Tri-Tip, Leg of Lamb (butterflied), Ribeye',tip:'Red oak is non-negotiable for authentic Santa Maria flavor. Reverse sear then finish over the hottest fire you can make.'},
+  {name:'Asian Fusion BBQ',emoji:'🍜',region:'East/Southeast Asian Influence',profile:'High heat, bold glazes, minimal smoke. Soy, gochujang, sesame, and char are the heroes.',wood:'Cherry / Plum',temp:'400°F+',rub:'Light salt and pepper — glaze carries the flavor',technique:'Hot and fast. Glaze only in the last 5 min or sugars burn',bestFor:'Chicken Thighs, Pork Belly, Wild Shrimp, Salmon',tip:'Add the glaze (gochujang, hoisin, or soy/sesame) only in the final 5 min of the cook. Any earlier and the sugars carbonize to bitter.'},
+];
 
 // ── HELPERS ───────────────────────────────────────────
 
@@ -864,6 +942,7 @@ function buildPhases(total,style){
     case'lowslow':return[{name:'🔥 Smoke (unwrapped)',mins:Math.round(total*.55)},{name:'📦 Wrapped cook',mins:Math.round(total*.35)},{name:'🧪 Probe tender finish',mins:Math.round(total*.10)}];
     case'ribs321':return[{name:'🔥 Phase 1: Smoke',mins:180},{name:'📦 Phase 2: Wrapped',mins:120},{name:'🍯 Phase 3: Sauce & Set',mins:60}];
     case'ribs221':return[{name:'🔥 Phase 1: Smoke',mins:120},{name:'📦 Phase 2: Wrapped',mins:120},{name:'🍯 Phase 3: Sauce & Set',mins:60}];
+    case'ribs211':return[{name:'🔥 Phase 1: Smoke',mins:120},{name:'📦 Phase 2: Wrapped',mins:60},{name:'🍯 Phase 3: Sauce & Set',mins:60}];
     case'steak':return[{name:'🌡 Smoke / low cook',mins:Math.round(total*.65)},{name:'🔥 Sear finish',mins:Math.round(total*.20)},{name:'😴 Rest',mins:Math.round(total*.15)}];
     case'poultry':return[{name:'🔥 Low smoke phase',mins:Math.round(total*.55)},{name:'🌡 High heat finish',mins:Math.round(total*.45)}];
     default:return[{name:'⏱ Cook',mins:total}];
@@ -1047,6 +1126,26 @@ function initTemps(){
   document.getElementById('temp-tbody').innerHTML=TEMP_TABLE.map(r=>`<tr><td>${r.cut}</td><td class="pull-temp">${r.pull}</td><td class="final-temp">${r.final}</td><td style="color:var(--muted);font-size:.78rem">${r.rest}</td></tr>`).join('');
 }
 
+// ── STYLES ────────────────────────────────────────────
+
+function renderStyles(){
+  document.getElementById('styles-list').innerHTML=STYLES.map(s=>`
+    <div class="style-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div><div class="style-name">${s.emoji} ${s.name}</div><div class="style-region">${s.region}</div></div>
+        <span class="badge badge-amber">${s.temp}</span>
+      </div>
+      <div class="info-note" style="margin-top:0;margin-bottom:10px;font-style:italic">${s.profile}</div>
+      <div style="font-size:.8rem">
+        <div class="style-row"><span class="style-label">Wood</span><span>${s.wood}</span></div>
+        <div class="style-row"><span class="style-label">Rub</span><span>${s.rub}</span></div>
+        <div class="style-row"><span class="style-label">Method</span><span>${s.technique}</span></div>
+        <div class="style-row"><span class="style-label">Best For</span><span style="color:var(--accent)">${s.bestFor}</span></div>
+      </div>
+      <div class="style-tip">💡 ${s.tip}</div>
+    </div>`).join('');
+}
+
 // ── TAB ───────────────────────────────────────────────
 
 function showTab(id,btn){
@@ -1063,6 +1162,7 @@ calcSalt();
 renderRubs();
 initWood();
 initTemps();
+renderStyles();
 </script>
 </body>
 </html>
