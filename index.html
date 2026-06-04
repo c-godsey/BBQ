@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Bbq Pit Boss",
+  "schemaVersion": 1,
+  "description": "BBQ Pit Boss — interactive calculator for cook times, internal temperatures, salt/brine ratios, and smoke wood pairings across all major meat types and cooking methods."
+}
+</script>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -16,8 +23,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 header{background:linear-gradient(135deg,#3a1a05,#1a0a02);padding:14px 16px 10px;border-bottom:2px solid var(--accent2)}
 header h1{font-size:1.3rem;font-weight:700;color:var(--accent);letter-spacing:.5px}
 header p{font-size:.75rem;color:var(--muted);margin-top:2px}
-nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto}
-nav button{flex:1;min-width:52px;min-height:44px;padding:10px 4px 8px;background:none;border:none;color:var(--muted);font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+#nav-bar{position:relative;background:var(--surface);border-bottom:1px solid var(--border);z-index:100}
+#nav-trigger{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 16px;background:none;border:none;color:var(--text);font-size:.95rem;font-weight:700;cursor:pointer;min-height:50px;-webkit-tap-highlight-color:transparent}
+#nav-label{color:var(--accent);letter-spacing:.3px}
+#nav-chevron{color:var(--muted);font-size:1.1rem;transition:transform .25s}
+#nav-chevron.open{transform:rotate(180deg)}
+#nav-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-top:none;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,.6);display:none}
+#nav-dropdown button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 18px;background:none;border:none;border-bottom:1px solid var(--border);color:var(--muted);font-size:.88rem;font-weight:600;cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;min-height:48px;transition:background .15s}
+#nav-dropdown button:last-child{border-bottom:none}
+#nav-dropdown button.active{color:var(--accent);background:rgba(232,120,32,.1)}
+#nav-dropdown button:not(.active):active{background:var(--surface2)}
+#nav-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99}
 nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
 nav button:hover:not(.active){color:var(--text)}
 .tab{display:none;padding:14px 14px calc(80px + env(safe-area-inset-bottom));max-width:600px;margin:0 auto}
@@ -98,7 +114,7 @@ details[open] summary::before{transform:rotate(90deg)}
 .salt-sub{font-size:.8rem;color:var(--muted);margin-top:2px}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
-@media(max-width:400px){nav button{font-size:.58rem;padding:10px 2px 8px}.result-main{font-size:1.6rem}.timer-display{font-size:1.8rem}.row2{grid-template-columns:1fr}}
+@media(max-width:400px){.result-main{font-size:1.6rem}.timer-display{font-size:1.8rem}.row2{grid-template-columns:1fr}}
 @media(hover:none){button,.btn{cursor:default}}
 #fs-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:1000;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #fs-inner{max-width:600px;margin:0 auto;padding:14px 14px calc(32px + env(safe-area-inset-bottom))}
@@ -140,15 +156,22 @@ input[type=number]{-moz-appearance:textfield}
   </div>
 </div>
 
-<nav id="nav">
-  <button class="active" onclick="showTab('cook',this)">🍖 Cook</button>
-  <button onclick="showTab('timer',this)">⏱ Timer</button>
-  <button onclick="showTab('temps',this)">🌡 Temps</button>
-  <button onclick="showTab('salt',this)">🧂 Salt</button>
-  <button onclick="showTab('rubs',this)">🌶 Rubs</button>
-  <button onclick="showTab('wood',this)">🪵 Wood</button>
-  <button onclick="showTab('styles',this)">🌎 Styles</button>
-</nav>
+<div id="nav-bar">
+  <button id="nav-trigger" onclick="toggleNavDropdown()">
+    <span id="nav-label">🍖 Cook</span>
+    <span id="nav-chevron">▾</span>
+  </button>
+  <div id="nav-dropdown">
+    <button data-tab="cook" class="active" onclick="showTab('cook')">🍖 Cook</button>
+    <button data-tab="timer" onclick="showTab('timer')">⏱ Timer</button>
+    <button data-tab="temps" onclick="showTab('temps')">🌡 Temps</button>
+    <button data-tab="salt" onclick="showTab('salt')">🧂 Salt</button>
+    <button data-tab="rubs" onclick="showTab('rubs')">🌶 Rubs</button>
+    <button data-tab="wood" onclick="showTab('wood')">🪵 Wood</button>
+    <button data-tab="styles" onclick="showTab('styles')">🌎 Styles</button>
+  </div>
+</div>
+<div id="nav-overlay" onclick="closeNavDropdown()"></div>
 
 <!-- COOK TAB -->
 <div id="tab-cook" class="tab active">
@@ -992,7 +1015,7 @@ function loadTimer(total,meatKey,dinnerVal){
   tmBuildPhases();
   // Create and auto-start
   _createTimer(meatName,total,style,dinnerVal,true);
-  showTab('timer',document.querySelectorAll('nav button')[1]);
+  showTab('timer');
 }
 
 function renderTimers(){
@@ -1148,11 +1171,32 @@ function renderStyles(){
 
 // ── TAB ───────────────────────────────────────────────
 
-function showTab(id,btn){
+const TAB_LABELS={'cook':'🍖 Cook','timer':'⏱ Timer','temps':'🌡 Temps','salt':'🧂 Salt','rubs':'🌶 Rubs','wood':'🪵 Wood','styles':'🌎 Styles'};
+
+function showTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#nav-dropdown button').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
+  const btn=document.querySelector(`#nav-dropdown [data-tab="${id}"]`);
   if(btn)btn.classList.add('active');
+  document.getElementById('nav-label').textContent=TAB_LABELS[id]||id;
+  closeNavDropdown();
+}
+
+function toggleNavDropdown(){
+  const dd=document.getElementById('nav-dropdown');
+  const ov=document.getElementById('nav-overlay');
+  const ch=document.getElementById('nav-chevron');
+  const open=dd.style.display==='block';
+  dd.style.display=open?'none':'block';
+  ov.style.display=open?'none':'block';
+  ch.classList.toggle('open',!open);
+}
+
+function closeNavDropdown(){
+  document.getElementById('nav-dropdown').style.display='none';
+  document.getElementById('nav-overlay').style.display='none';
+  document.getElementById('nav-chevron').classList.remove('open');
 }
 
 // ── INIT ──────────────────────────────────────────────
