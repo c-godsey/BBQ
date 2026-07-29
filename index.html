@@ -1,11 +1,4 @@
 <!DOCTYPE html>
-<script type="application/json" id="cowork-artifact-meta">
-{
-  "name": "Bbq Pit Boss",
-  "schemaVersion": 1,
-  "description": "BBQ Pit Boss — interactive calculator for cook times, internal temperatures, salt/brine ratios, and smoke wood pairings across all major meat types and cooking methods."
-}
-</script>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -13,11 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BBQ Calc">
-<meta name="theme-color" content="#1a1008">
-<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22BBQ%20Pit%20Calculator%22,%22short_name%22:%22BBQ%20Calc%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%231a1008%22,%22theme_color%22:%22%231a1008%22}">
+<meta name="theme-color" content="#231509">
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22BBQ%20Pit%20Calculator%22,%22short_name%22:%22BBQ%20Calc%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23231509%22,%22theme_color%22:%22%23231509%22}">
 <title>BBQ Pit Calculator</title>
 <style>
-:root{--bg:#1a1008;--surface:#261a0e;--surface2:#332211;--border:#4a3020;--accent:#e87820;--accent2:#c85a10;--text:#f0e0c8;--muted:#a08060;--green:#4caf50;--red:#ef5350;--amber:#ffa726;--blue:#42a5f5}
+:root{--bg:#231509;--surface:#2e1f10;--surface2:#3c2812;--border:#5a3c26;--accent:#ec9035;--accent2:#d06a1e;--text:#f5e8d4;--muted:#b08e6e;--green:#4caf50;--red:#ef5350;--amber:#ffa726;--blue:#42a5f5}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;min-height:100vh}
 header{background:linear-gradient(135deg,#3a1a05,#1a0a02);padding:14px 16px 10px;border-bottom:2px solid var(--accent2)}
@@ -137,6 +130,69 @@ input[type=number]{-moz-appearance:textfield}
 .stall-option{background:var(--surface2);border-radius:8px;padding:10px;border:1px solid var(--border)}
 .stall-option h4{font-size:.8rem;font-weight:700;margin-bottom:6px}
 .stall-option p{font-size:.75rem;color:var(--muted);line-height:1.4}
+/* ── WIZARD ── */
+.wiz-progress{background:var(--surface);padding:16px 16px 0;border-bottom:1px solid var(--border)}
+.wiz-track{display:flex;align-items:center}
+.wiz-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;transition:all .2s}
+.wiz-dot.done{background:var(--accent);color:#fff}
+.wiz-dot.active{background:var(--accent);color:#fff;box-shadow:0 0 0 4px rgba(236,144,53,.2)}
+.wiz-dot.idle{background:var(--surface2);color:var(--muted);border:1.5px solid var(--border)}
+.wiz-line{flex:1;height:2px;background:var(--border);transition:background .3s}
+.wiz-line.done{background:var(--accent)}
+.wiz-step-labels{display:flex;justify-content:space-between;margin-top:7px;padding-bottom:12px}
+.wiz-step-lbl{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;text-align:center;width:28px}
+.wiz-step-lbl.active{color:var(--accent)}
+.wiz-step{padding:18px 16px 8px}
+.wiz-step-num{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.wiz-step-title{font-size:22px;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:4px}
+.wiz-step-sub{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.4}
+.wiz-chip{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border-color .15s,background .15s;margin-bottom:8px;-webkit-tap-highlight-color:transparent}
+.wiz-chip:active{background:var(--surface2)}
+.wiz-chip.sel{background:rgba(236,144,53,.1);border-color:var(--accent)}
+.wiz-chip-info{flex:1;min-width:0}
+.wiz-chip-name{font-size:14px;font-weight:700;color:var(--text)}
+.wiz-chip-desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+.wiz-radio{width:20px;height:20px;border-radius:50%;flex-shrink:0;margin-left:12px}
+.wiz-radio.idle{border:2px solid var(--border)}
+.wiz-radio.sel{background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800}
+.wiz-cat-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:12px 0 6px}
+.wiz-cat-label:first-child{padding-top:0}
+.wiz-nav{display:flex;gap:10px;margin-top:16px;padding-bottom:8px}
+.wiz-btn-back{background:var(--surface);border:1.5px solid var(--border);color:var(--muted);border-radius:10px;padding:13px 18px;font-size:13px;font-weight:700;cursor:pointer;min-height:50px;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.wiz-btn-next,.wiz-btn-calc{background:var(--accent);border:none;color:#fff;border-radius:10px;padding:13px 20px;font-size:14px;font-weight:800;cursor:pointer;min-height:50px;flex:1;-webkit-tap-highlight-color:transparent}
+.wiz-btn-next:disabled{background:var(--surface2);color:var(--muted)}
+.wiz-see-all{text-align:center;padding:6px 0 18px}
+.wiz-see-all span{font-size:12px;color:var(--muted);border-bottom:1px dashed var(--border);padding-bottom:1px;cursor:pointer}
+.wiz-weight-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 12px}
+.wiz-step-btn{width:42px;height:42px;border-radius:8px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0;user-select:none}
+.wiz-weight-val{flex:1;text-align:center;font-size:28px;font-weight:800;color:var(--text);background:none;border:none;outline:none;width:0;min-width:0;-moz-appearance:textfield}
+.wiz-weight-val::-webkit-outer-spin-button,.wiz-weight-val::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.wiz-unit-toggle{display:flex;background:var(--surface2);border-radius:8px;padding:3px;gap:2px;flex-shrink:0}
+.wiz-unit-btn{padding:6px 11px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none;color:var(--muted);background:none;-webkit-tap-highlight-color:transparent}
+.wiz-unit-btn.sel{background:var(--accent);color:#fff}
+.wiz-salt-card{background:rgba(236,144,53,.08);border:1px solid rgba(236,144,53,.25);border-radius:10px;padding:12px 14px;margin-top:14px}
+.wiz-salt-title{font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.wiz-salt-val{font-size:20px;font-weight:800;color:var(--text)}
+.wiz-salt-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.wiz-section-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:16px 0 8px}
+.wiz-time-input{font-size:32px;font-weight:800;color:var(--text);text-align:center;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;width:100%;color-scheme:dark;-webkit-appearance:none}
+.wiz-people-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:10px}
+.wiz-people-lbl{font-size:14px;font-weight:700;color:var(--text)}
+.wiz-people-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.wiz-cond{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:10px}
+.wiz-cond summary{font-size:12px;color:var(--muted);cursor:pointer;list-style:none;font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:6px}
+.wiz-cond summary::before{content:'▶';font-size:.55rem;transition:transform .2s}
+.wiz-cond[open] summary::before{transform:rotate(90deg)}
+.wiz-result-screen{padding:14px 14px calc(80px + env(safe-area-inset-bottom))}
+.wiz-new-cook{width:100%;padding:13px;background:var(--surface);color:var(--muted);border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;-webkit-tap-highlight-color:transparent;min-height:50px}
+.wiz-all-mode .wiz-nav{display:none}
+.wiz-all-calc{display:none;padding:0 16px 16px}
+.wiz-cat-card{display:flex;align-items:center;gap:14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:16px 14px;margin-bottom:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s,background .15s}
+.wiz-cat-card:active{background:rgba(232,144,53,.08);border-color:var(--accent)}
+.wiz-cat-emoji{font-size:1.8rem;line-height:1;min-width:36px;text-align:center}
+.wiz-cat-name{flex:1;font-size:1.05rem;font-weight:700;color:var(--text)}
+.wiz-cat-arr{font-size:1.4rem;color:var(--muted)}
+.wiz-cat-back{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:14px;padding:4px 0;-webkit-tap-highlight-color:transparent}
 </style>
 </head>
 <body>
@@ -167,6 +223,7 @@ input[type=number]{-moz-appearance:textfield}
     <button data-tab="temps" onclick="showTab('temps')">🌡 Temps</button>
     <button data-tab="salt" onclick="showTab('salt')">🧂 Salt</button>
     <button data-tab="rubs" onclick="showTab('rubs')">🌶 Rubs</button>
+    <button data-tab="sauces" onclick="showTab('sauces')">🫙 Sauces</button>
     <button data-tab="wood" onclick="showTab('wood')">🪵 Wood</button>
     <button data-tab="styles" onclick="showTab('styles')">🌎 Styles</button>
   </div>
@@ -175,104 +232,177 @@ input[type=number]{-moz-appearance:textfield}
 
 <!-- COOK TAB -->
 <div id="tab-cook" class="tab active">
-  <div class="card">
-    <h3>🥩 Meat Selection</h3>
-    <div class="field">
-      <label>Meat / Cut</label>
-      <select id="ct-meat" onchange="updateCookOptions()">
-        <optgroup label="— Beef —">
-          <option value="brisket">Brisket (Full Packer)</option>
-          <option value="brisket-flat">Brisket Flat</option>
-          <option value="chuck-roast">Chuck Roast</option>
-          <option value="ribeye">Ribeye Steak</option>
-          <option value="ny-strip">NY Strip Steak</option>
-          <option value="tri-tip">Tri-Tip</option>
-          <option value="beef-ribs">Beef Back Ribs</option>
-          <option value="beef-short-ribs">Beef Short Ribs (Plate)</option>
-          <option value="smoked-burgers">Smoked Burgers</option>
-        </optgroup>
-        <optgroup label="— Pork —">
-          <option value="pork-shoulder">Pork Shoulder / Butt</option>
-          <option value="pork-loin">Pork Loin</option>
-          <option value="pork-tenderloin">Pork Tenderloin</option>
-          <option value="spare-ribs">Spare Ribs / St. Louis</option>
-          <option value="baby-back">Baby Back Ribs</option>
-          <option value="pork-belly">Pork Belly</option>
-        </optgroup>
-        <optgroup label="— Poultry —">
-          <option value="whole-chicken">Whole Chicken</option>
-          <option value="chicken-thighs">Chicken Thighs</option>
-          <option value="chicken-breast">Chicken Breast</option>
-          <option value="chicken-wings">Chicken Wings</option>
-          <option value="chicken-drumsticks">Chicken Drumsticks</option>
-          <option value="whole-turkey">Whole Turkey</option>
-          <option value="turkey-breast">Turkey Breast</option>
-        </optgroup>
-        <optgroup label="— Lamb —">
-          <option value="lamb-leg">Leg of Lamb</option>
-          <option value="lamb-shoulder">Lamb Shoulder</option>
-          <option value="lamb-chops">Lamb Chops / Rack</option>
-        </optgroup>
-        <optgroup label="— Seafood —">
-          <option value="salmon">Salmon Fillet</option>
-          <option value="whole-fish">Whole Fish</option>
-          <option value="shrimp">Wild Shrimp</option>
-        </optgroup>
-      </select>
+
+  <!-- WIZARD UI -->
+  <div id="wiz-ui">
+    <div class="wiz-progress">
+      <div class="wiz-track" id="wiz-track"></div>
+      <div class="wiz-step-labels" id="wiz-labels"></div>
     </div>
-    <div class="field" id="ct-bone-row" style="display:none">
-      <label>Bone Option</label>
-      <select id="ct-bone" onchange="onBoneChange()"></select>
-    </div>
-    <div id="ct-bone-note" class="info-note" style="display:none"></div>
-    <div class="row2">
-      <div class="field">
-        <label>Weight</label>
-        <input type="text" inputmode="decimal" id="ct-weight" value="10" oninput="calculateCookTime()">
-      </div>
-      <div class="field">
-        <label>Unit</label>
-        <select id="ct-unit" onchange="calculateCookTime()">
-          <option value="lbs">lbs</option>
-          <option value="kg">kg</option>
-        </select>
+
+    <!-- Step 1: Cut -->
+    <div class="wiz-step" id="wiz-s1">
+      <div class="wiz-step-num">Step 1 of 4</div>
+      <div class="wiz-step-title">What are you cooking?</div>
+      <div id="wiz-cut-list"></div>
+      <div class="wiz-nav">
+        <div style="flex:1"></div>
+        <button class="wiz-btn-next" id="wiz-s1-next" onclick="wizGo(2)" disabled>Next →</button>
       </div>
     </div>
-    <div class="field">
-      <label>Cooking Method</label>
-      <select id="ct-method" onchange="calculateCookTime()"></select>
+
+    <!-- Step 2: Method -->
+    <div class="wiz-step" id="wiz-s2" style="display:none">
+      <div class="wiz-step-num">Step 2 of 4</div>
+      <div class="wiz-step-title">How are you cooking it?</div>
+      <div class="wiz-step-sub" id="wiz-s2-sub"></div>
+      <div id="wiz-method-list"></div>
+      <div class="wiz-nav">
+        <button class="wiz-btn-back" onclick="wizGo(1)">← Back</button>
+        <button class="wiz-btn-next" id="wiz-s2-next" onclick="wizGo(3)" disabled>Next →</button>
+      </div>
     </div>
-    <div class="field" id="ct-doneness-wrap">
-      <label>Doneness</label>
-      <select id="ct-doneness" onchange="calculateCookTime()"></select>
-    </div>
-    <div class="field">
-      <label>🍽 Dinner Time</label>
-      <input type="time" id="ct-dinner" value="18:00" onchange="calculateCookTime()">
-    </div>
-  </div>
-  <div class="card">
-    <details>
-      <summary>🌡 Conditions &amp; Serving</summary>
-      <div style="padding-top:10px">
-        <div class="row2">
-          <div class="field">
-            <label>Outdoor Temp (°F)</label>
-            <input type="text" inputmode="numeric" id="ct-ambient" value="70" oninput="calculateCookTime()">
-          </div>
-          <div class="field">
-            <label>People to Feed</label>
-            <input type="text" inputmode="numeric" id="ct-people" value="6" oninput="calculateCookTime()">
-          </div>
-        </div>
-        <div class="toggle-row">
-          <input type="checkbox" id="ct-windy" onchange="calculateCookTime()">
-          <label for="ct-windy">Windy conditions (+10% time)</label>
+
+    <!-- Step 3: Weight + Salt + Doneness + Bone -->
+    <div class="wiz-step" id="wiz-s3" style="display:none">
+      <div class="wiz-step-num">Step 3 of 4</div>
+      <div class="wiz-step-title">How much are you cooking?</div>
+      <div class="wiz-step-sub" id="wiz-s3-sub"></div>
+      <div class="wiz-weight-row">
+        <div class="wiz-step-btn" onclick="wizWeightAdj(-1)">−</div>
+        <input class="wiz-weight-val" id="wiz-weight-display" type="number" inputmode="decimal" min="0.5" step="0.5" value="10" oninput="wizWeightTyped(this.value)" onblur="wizWeightBlur(this)">
+        <div class="wiz-step-btn" onclick="wizWeightAdj(1)">+</div>
+        <div class="wiz-unit-toggle">
+          <button class="wiz-unit-btn sel" id="wiz-unit-lbs" onclick="wizSetUnit('lbs')">lbs</button>
+          <button class="wiz-unit-btn" id="wiz-unit-kg" onclick="wizSetUnit('kg')">kg</button>
         </div>
       </div>
-    </details>
+      <div class="wiz-salt-card">
+        <div class="wiz-salt-title">🧂 Dry Brine — Morton Kosher Salt</div>
+        <div class="wiz-salt-val" id="wiz-salt-val">—</div>
+        <div class="wiz-salt-sub" id="wiz-salt-sub">Apply overnight for best bark and crust</div>
+      </div>
+      <div id="wiz-bone-section" style="display:none">
+        <div class="wiz-section-label">Bone option</div>
+        <div id="wiz-bone-list"></div>
+      </div>
+      <div id="wiz-doneness-section" style="display:none">
+        <div class="wiz-section-label">Doneness</div>
+        <div id="wiz-doneness-list"></div>
+      </div>
+      <div class="wiz-nav">
+        <button class="wiz-btn-back" onclick="wizGo(2)">← Back</button>
+        <button class="wiz-btn-next" onclick="wizGo(4)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Dinner Time + Conditions -->
+    <div class="wiz-step" id="wiz-s4" style="display:none">
+      <div class="wiz-step-num">Step 4 of 4</div>
+      <div class="wiz-step-title">When do you want to eat?</div>
+      <div class="wiz-step-sub" id="wiz-s4-sub"></div>
+      <input type="time" class="wiz-time-input" id="wiz-dinner" value="18:00" onchange="wizState.dinner=this.value">
+      <div class="wiz-people-row">
+        <div>
+          <div class="wiz-people-lbl">People to feed</div>
+          <div class="wiz-people-sub">Estimates raw weight needed</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="wiz-step-btn" onclick="wizPeopleAdj(-1)">−</div>
+          <div style="font-size:22px;font-weight:800;color:var(--text);min-width:24px;text-align:center" id="wiz-people-val">6</div>
+          <div class="wiz-step-btn" onclick="wizPeopleAdj(1)">+</div>
+        </div>
+      </div>
+      <details class="wiz-cond">
+        <summary>Conditions (optional)</summary>
+        <div style="padding-top:12px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label style="font-size:13px;color:var(--text);font-weight:600">Outdoor temp (°F)</label>
+            <input type="text" inputmode="numeric" id="wiz-ambient" value="70" style="width:68px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:15px;text-align:center">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="checkbox" id="wiz-windy" style="width:20px;height:20px;accent-color:var(--accent)">
+            <label for="wiz-windy" style="font-size:13px;color:var(--text);font-weight:600">Windy (+10% time)</label>
+          </div>
+        </div>
+      </details>
+      <div class="wiz-nav">
+        <button class="wiz-btn-back" onclick="wizGo(3)">← Back</button>
+        <button class="wiz-btn-calc" onclick="wizCalculate()">Calculate →</button>
+      </div>
+    </div>
+
+    <!-- All-at-once calculate button (hidden in step mode) -->
+    <div class="wiz-all-calc" id="wiz-all-calc">
+      <button class="wiz-btn-calc" style="width:100%" onclick="wizCalculate()">Calculate →</button>
+    </div>
+
+    <div class="wiz-see-all"><span onclick="toggleWizAll()">See all options at once ↓</span></div>
   </div>
-  <div id="ct-result" style="display:none"></div>
+
+  <!-- RESULT SCREEN -->
+  <div id="wiz-result" style="display:none" class="wiz-result-screen">
+    <div id="wiz-result-inner"></div>
+    <button class="wiz-new-cook" onclick="wizReset()">← Start new cook</button>
+  </div>
+
+  <!-- HIDDEN FORM (keeps calculateCookTime engine working) -->
+  <div style="display:none">
+    <select id="ct-meat">
+      <optgroup label="Beef">
+        <option value="brisket">Brisket (Full Packer)</option>
+        <option value="brisket-flat">Brisket Flat</option>
+        <option value="chuck-roast">Chuck Roast</option>
+        <option value="ribeye">Ribeye Steak</option>
+        <option value="ny-strip">NY Strip Steak</option>
+        <option value="tri-tip">Tri-Tip</option>
+        <option value="beef-ribs">Beef Back Ribs</option>
+        <option value="beef-short-ribs">Beef Short Ribs (Plate)</option>
+        <option value="smoked-burgers">Smoked Burgers</option>
+      </optgroup>
+      <optgroup label="Pork">
+        <option value="pork-shoulder">Pork Shoulder / Butt</option>
+        <option value="pork-loin">Pork Loin</option>
+        <option value="pork-tenderloin">Pork Tenderloin</option>
+        <option value="spare-ribs">Spare Ribs / St. Louis</option>
+        <option value="baby-back">Baby Back Ribs</option>
+        <option value="pork-belly">Pork Belly</option>
+      </optgroup>
+      <optgroup label="Poultry">
+        <option value="whole-chicken">Whole Chicken</option>
+        <option value="chicken-thighs">Chicken Thighs</option>
+        <option value="chicken-breast">Chicken Breast</option>
+        <option value="chicken-wings">Chicken Wings</option>
+        <option value="chicken-drumsticks">Chicken Drumsticks</option>
+        <option value="whole-turkey">Whole Turkey</option>
+        <option value="turkey-breast">Turkey Breast</option>
+      </optgroup>
+      <optgroup label="Lamb">
+        <option value="lamb-leg">Leg of Lamb</option>
+        <option value="lamb-shoulder">Lamb Shoulder</option>
+        <option value="lamb-chops">Lamb Chops / Rack</option>
+      </optgroup>
+      <optgroup label="Seafood">
+        <option value="salmon">Salmon Fillet</option>
+        <option value="whole-fish">Whole Fish</option>
+        <option value="shrimp">Wild Shrimp</option>
+      </optgroup>
+    </select>
+    <select id="ct-bone"></select>
+    <div id="ct-bone-row"></div>
+    <div id="ct-bone-note"></div>
+    <div id="ct-doneness-wrap"></div>
+    <input type="text" id="ct-weight" value="10">
+    <select id="ct-unit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+    <select id="ct-method"></select>
+    <select id="ct-doneness"></select>
+    <input type="text" id="ct-ambient" value="70">
+    <input type="checkbox" id="ct-windy">
+    <input type="text" id="ct-people" value="6">
+    <input type="time" id="ct-dinner" value="18:00">
+    <div id="ct-result"></div>
+  </div>
+
   <div id="ct-guide"></div>
 </div>
 
@@ -305,13 +435,21 @@ input[type=number]{-moz-appearance:textfield}
       <input type="time" id="tm-dinner" value="18:00" onchange="tmBuildPhases()">
     </div>
     <div id="tm-start-info" style="display:none;margin-bottom:12px"></div>
-    <button onclick="tmAddTimer()" style="background:var(--surface2);color:var(--accent);border:1px solid var(--accent);padding:9px 16px;border-radius:6px;font-size:.85rem;font-weight:700;cursor:pointer;min-height:44px;width:100%">+ Add Timer</button>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button onclick="tmAddTimer()" style="flex:1;background:var(--surface2);color:var(--accent);border:1px solid var(--accent);padding:9px 16px;border-radius:6px;font-size:.85rem;font-weight:700;cursor:pointer;min-height:44px">+ Add Timer</button>
+      <button id="wakelock-btn" onclick="toggleWakeLock()" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);padding:9px 12px;border-radius:6px;font-size:.82rem;font-weight:700;cursor:pointer;min-height:44px;white-space:nowrap" title="Keep screen on while cooking">💤 Keep Awake</button>
+    </div>
   </div>
   <div id="tm-phase-preview" class="card" style="display:none">
     <h3>📋 Phases Preview</h3>
     <div id="tm-phase-list"></div>
   </div>
   <div id="tm-timers"></div>
+  <div class="card" style="margin-top:12px">
+    <h3>🧊 Cooler Hold Times</h3>
+    <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">Pre-heat cooler with boiling water (dump first), then line with towels. Never skip — it can mean the difference between 2 hrs and 5 hrs hold time.</p>
+    <div id="cooler-hold-list"></div>
+  </div>
 </div>
 
 <!-- TEMPS TAB -->
@@ -404,6 +542,46 @@ input[type=number]{-moz-appearance:textfield}
       </tbody>
     </table>
   </div>
+  <div class="card">
+    <h3>💧 Wet Brine Calculator</h3>
+    <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">Equilibrium brine: 4% salt by water weight. Fully penetrates without over-salting.</p>
+    <div class="row2">
+      <div class="field"><label>Meat Weight</label>
+        <input type="text" inputmode="decimal" id="wb-weight" value="5" oninput="calcWetBrine()">
+      </div>
+      <div class="field"><label>Unit</label>
+        <select id="wb-unit" onchange="calcWetBrine()"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Salt Type</label>
+      <select id="wb-type" onchange="calcWetBrine()">
+        <option value="kosher-morton">Morton Kosher Salt</option>
+        <option value="kosher-diamond">Diamond Crystal Kosher</option>
+        <option value="table">Table Salt</option>
+      </select>
+    </div>
+    <div id="wb-result"></div>
+  </div>
+  <div class="card">
+    <h3>💉 Injection Calculator</h3>
+    <p style="font-size:.75rem;color:var(--muted);margin-bottom:12px">Standard: inject 10% of meat weight. Use a large-bore needle in a grid pattern every 1–2 inches.</p>
+    <div class="row2">
+      <div class="field"><label>Meat Weight</label>
+        <input type="text" inputmode="decimal" id="inj-weight" value="10" oninput="calcInjection()">
+      </div>
+      <div class="field"><label>Unit</label>
+        <select id="inj-unit" onchange="calcInjection()"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Recipe</label>
+      <select id="inj-recipe" onchange="calcInjection()">
+        <option value="0">Pork Competition Injection</option>
+        <option value="1">Brisket Injection</option>
+        <option value="2">Poultry Injection</option>
+      </select>
+    </div>
+    <div id="inj-result"></div>
+  </div>
 </div>
 
 <!-- RUBS TAB -->
@@ -431,6 +609,22 @@ input[type=number]{-moz-appearance:textfield}
     <p style="font-size:.78rem;color:var(--muted)">Regional traditions — rubs, woods, and technique presets.</p>
   </div>
   <div id="styles-list"></div>
+</div>
+
+<!-- SAUCES TAB -->
+<div id="tab-sauces" class="tab">
+  <div class="card">
+    <h3>🫙 Sauce & Mop Recipes</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:.8rem;color:var(--muted)">Batch size</span>
+      <div style="display:flex;gap:6px">
+        <button class="wiz-unit-btn sel" id="sc-1x" onclick="setSauceMult(1)">1×</button>
+        <button class="wiz-unit-btn" id="sc-2x" onclick="setSauceMult(2)">2×</button>
+        <button class="wiz-unit-btn" id="sc-3x" onclick="setSauceMult(3)">3×</button>
+      </div>
+    </div>
+  </div>
+  <div id="sc-list"></div>
 </div>
 
 <!-- WOOD TAB -->
@@ -475,54 +669,193 @@ const DONENESS_TEMPS = {
 const ML = {pellet:'Pellet Grill',smoke:'Offset / Charcoal',grill:'Direct Grill',reverse:'Reverse Sear',oven:'Oven Roast'};
 
 const MEAT = {
-  'brisket':{name:'Brisket (Full Packer)',cat:'beef',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,ovenRate:.8,pull:{pellet:195,smoke:195,oven:195},final:203,rest:'1–2 hrs',notes:'Cook to feel — probe slides like butter at 203°F. Bark must be fully set before wrapping.',servingLoss:.40,servingSize:.33},
-  'brisket-flat':{name:'Brisket Flat',cat:'beef',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,ovenRate:.8,pull:{pellet:195,smoke:195,oven:195},final:203,rest:'45 min',notes:'Leaner than full packer. Wraps earlier. Watch for drying out — spray with beef tallow.',servingLoss:.38,servingSize:.33},
-  'chuck-roast':{name:'Chuck Roast',cat:'beef',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,ovenRate:.8,pull:{pellet:195,smoke:200,oven:200},final:205,rest:'30 min',notes:'Poor man\'s burnt ends. Cube and braise in sauce at the end for sticky caramelized bark.',servingLoss:.35,servingSize:.33},
-  'ribeye':{name:'Ribeye Steak',cat:'beef',methods:['pellet','smoke','grill','reverse'],donenessType:'steak',pelletRate:.19,smokeRate:.22,grillRate:.10,reverseRate:.30,pull:{pellet:125,smoke:125,grill:125,reverse:125},final:130,rest:'5–8 min',notes:'High fat content = forgiving. Best at med-rare. Rest on a wire rack, not a cutting board.',servingLoss:.10,servingSize:.5},
-  'ny-strip':{name:'NY Strip Steak',cat:'beef',methods:['pellet','smoke','grill','reverse'],donenessType:'steak',pelletRate:.18,smokeRate:.20,grillRate:.09,reverseRate:.28,pull:{pellet:125,smoke:125,grill:125,reverse:125},final:130,rest:'5 min',notes:'Leaner than ribeye. Season simply with salt, pepper, and garlic.',servingLoss:.10,servingSize:.45},
-  'tri-tip':{name:'Tri-Tip',cat:'beef',methods:['pellet','smoke','grill','reverse'],donenessType:'steak',pelletRate:.25,smokeRate:.30,grillRate:.13,reverseRate:.35,pull:{pellet:125,smoke:125,grill:128,reverse:125},final:130,rest:'10 min',notes:'Santa Maria staple. Has two grain directions — slice correctly for tenderness.',servingLoss:.12,servingSize:.40},
-  'beef-ribs':{name:'Beef Back Ribs',cat:'beef',methods:['pellet','smoke'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,pull:{pellet:195,smoke:200},final:203,rest:'30 min',notes:'Mainly bone — don\'t judge by weight. Done when meat pulls back 1" from bone tips.',servingLoss:.50,servingSize:.5},
-  'beef-short-ribs':{name:'Beef Short Ribs (Plate)',cat:'beef',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.95,smokeRate:1.1,ovenRate:.9,pull:{pellet:200,smoke:203,oven:203},final:205,rest:'30–45 min',notes:'Dino ribs. Incredible bark. Probe should slide like hot butter at 203–205°F.',servingLoss:.40,servingSize:.5,
+  // ── BEEF ──────────────────────────────────────────────────────────────────
+  // Brisket at 225°F: ~1.0–1.3 hrs/lb on pellet, 1.2–1.5 on offset
+  'brisket':{name:'Brisket (Full Packer)',cat:'beef',methods:['pellet','smoke','oven'],donenessType:'low-slow',
+    pelletRate:1.05,smokeRate:1.25,ovenRate:.88,
+    pull:{pellet:195,smoke:195,oven:195},final:203,rest:'1–2 hrs',
+    notes:'Cook to feel — probe slides like butter at 203°F. Bark must be fully set before wrapping.',
+    servingLoss:.40,servingSize:.33},
+  // Flat is leaner and thinner — slightly faster per lb
+  'brisket-flat':{name:'Brisket Flat',cat:'beef',methods:['pellet','smoke','oven'],donenessType:'low-slow',
+    pelletRate:.95,smokeRate:1.1,ovenRate:.82,
+    pull:{pellet:195,smoke:195,oven:195},final:203,rest:'45 min',
+    notes:'Leaner than full packer. Wraps earlier. Watch for drying out — spray with beef tallow.',
+    servingLoss:.38,servingSize:.33},
+  // Chuck: 225°F, ~1.3–1.5 hrs/lb (3.5 lb = 4.5–5.5 hrs)
+  'chuck-roast':{name:'Chuck Roast',cat:'beef',methods:['pellet','smoke','oven'],donenessType:'low-slow',
+    pelletRate:1.3,smokeRate:1.5,ovenRate:1.1,
+    pull:{pellet:195,smoke:200,oven:200},final:205,rest:'30 min',
+    notes:'Poor man\'s burnt ends. Cube and braise in sauce at the end for sticky caramelized bark.',
+    servingLoss:.35,servingSize:.33},
+  // Steak at 225°F to 125°F: ~40–50 min for a 1.5 lb ribeye → .45 hrs/lb
+  'ribeye':{name:'Ribeye Steak',cat:'beef',methods:['pellet','smoke','grill','reverse'],donenessType:'steak',
+    pelletRate:.45,smokeRate:.52,grillRate:.15,reverseRate:.55,
+    pull:{pellet:125,smoke:125,grill:125,reverse:125},final:130,rest:'5–8 min',
+    notes:'High fat content = forgiving. Best at med-rare. Rest on a wire rack, not a cutting board.',
+    servingLoss:.10,servingSize:.5},
+  'ny-strip':{name:'NY Strip Steak',cat:'beef',methods:['pellet','smoke','grill','reverse'],donenessType:'steak',
+    pelletRate:.43,smokeRate:.50,grillRate:.14,reverseRate:.52,
+    pull:{pellet:125,smoke:125,grill:125,reverse:125},final:130,rest:'5 min',
+    notes:'Leaner than ribeye. Season simply with salt, pepper, and garlic.',
+    servingLoss:.10,servingSize:.45},
+  // Tri-tip: 2–3 lbs, 225°F → ~60–75 min (.40 hrs/lb)
+  'tri-tip':{name:'Tri-Tip',cat:'beef',methods:['pellet','smoke','grill','reverse'],donenessType:'steak',
+    pelletRate:.40,smokeRate:.48,grillRate:.15,reverseRate:.50,
+    pull:{pellet:125,smoke:125,grill:128,reverse:125},final:130,rest:'10 min',
+    notes:'Santa Maria staple. Has two grain directions — slice correctly for tenderness.',
+    servingLoss:.12,servingSize:.40},
+  // Beef back ribs: cook time is rack-based, not weight-based (6–7 hrs at 225°F)
+  'beef-ribs':{name:'Beef Back Ribs',cat:'beef',methods:['pellet','smoke'],donenessType:'low-slow',
+    fixedCookMins:{pellet:360,smoke:420},
+    pull:{pellet:195,smoke:200},final:203,rest:'30 min',
+    notes:'Mainly bone — don\'t judge by weight. Done when meat pulls back 1" from bone tips.',
+    servingLoss:.50,servingSize:.5},
+  // Plate short ribs: 4 lb plate, 225°F → 8–10 hrs → ~2.0–2.5 hrs/lb
+  'beef-short-ribs':{name:'Beef Short Ribs (Plate)',cat:'beef',methods:['pellet','smoke','oven'],donenessType:'low-slow',
+    pelletRate:2.0,smokeRate:2.3,ovenRate:1.8,
+    pull:{pellet:200,smoke:203,oven:203},final:205,rest:'30–45 min',
+    notes:'Dino ribs. Incredible bark. Probe should slide like hot butter at 203–205°F.',
+    servingLoss:.40,servingSize:.5,
     boneOpts:{default:'bone-in',options:[
       {v:'bone-in',l:'Bone-In',rateMult:1.0,methods:['pellet','smoke','oven'],notes:'Classic preparation. Bone-in adds massive flavor and makes an impressive showpiece presentation.'},
       {v:'boneless',l:'Boneless',rateMult:.85,methods:['pellet','smoke','oven','grill'],notes:'Cooks ~15% faster. Can be rolled and tied. Works on the grill for an even sear all around.'}
     ]}},
-  'pork-shoulder':{name:'Pork Shoulder / Butt',cat:'pork',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,ovenRate:.8,pull:{pellet:195,smoke:200,oven:200},final:203,rest:'1 hr',notes:'Most forgiving BBQ cut. Can hold in a cooler for hours. The money muscle is the prize.',servingLoss:.38,servingSize:.33,
+  // ── PORK ──────────────────────────────────────────────────────────────────
+  // Pork shoulder: 225°F, 1.5–2 hrs/lb is the real-world standard
+  'pork-shoulder':{name:'Pork Shoulder / Butt',cat:'pork',methods:['pellet','smoke','oven'],donenessType:'low-slow',
+    pelletRate:1.5,smokeRate:1.75,ovenRate:1.3,
+    pull:{pellet:195,smoke:200,oven:200},final:203,rest:'1 hr',
+    notes:'Most forgiving BBQ cut. Can hold in a cooler for hours. The money muscle is the prize.',
+    servingLoss:.38,servingSize:.33,
     boneOpts:{default:'bone-in',options:[
       {v:'bone-in',l:'Bone-In',rateMult:1.0,methods:['pellet','smoke','oven'],notes:'Traditional pulled pork. Bone acts as heat sink for more even cook and richer flavor.'},
       {v:'boneless',l:'Boneless',rateMult:.90,methods:['pellet','smoke','oven'],notes:'Cooks ~10% faster. Easier to shred. Excellent for injections — no bone blocking needle paths.'}
     ]}},
-  'pork-loin':{name:'Pork Loin',cat:'pork',methods:['pellet','smoke','grill','reverse','oven'],donenessType:'pork-loin',pelletRate:.35,smokeRate:.40,grillRate:.17,reverseRate:.40,ovenRate:.33,pull:{pellet:140,smoke:140,grill:140,reverse:140,oven:140},final:145,rest:'10 min',notes:'Very lean — don\'t overcook. Wrap in bacon to add fat or brine overnight.',servingLoss:.15,servingSize:.35},
-  'pork-tenderloin':{name:'Pork Tenderloin',cat:'pork',methods:['pellet','smoke','grill','reverse','oven'],donenessType:'pork-loin',pelletRate:.30,smokeRate:.35,grillRate:.15,reverseRate:.35,ovenRate:.28,pull:{pellet:140,smoke:140,grill:140,reverse:140,oven:140},final:145,rest:'5 min',notes:'Cooks fast. Silver skin must be removed before cooking. Butterfly for faster, even heat.',servingLoss:.12,servingSize:.33},
-  'spare-ribs':{name:'Spare Ribs / St. Louis',cat:'pork',methods:['pellet','smoke'],donenessType:'low-slow',pelletRate:.52,smokeRate:.60,pull:{pellet:195,smoke:200},final:203,rest:'15 min',notes:'3-2-1 method: 3 hrs smoke, 2 hrs wrapped, 1 hr sauced. Probe slides between bones at 195°F.',servingLoss:.45,servingSize:.5},
-  'baby-back':{name:'Baby Back Ribs',cat:'pork',methods:['pellet','smoke'],donenessType:'low-slow',pelletRate:.43,smokeRate:.50,pull:{pellet:195,smoke:195},final:200,rest:'10 min',notes:'2-2-1 for fall-off-the-bone; 2-1-1 for firmer competition bite. Thinner than spare ribs — watch for drying out. Bend test: cracks form when done.',servingLoss:.40,servingSize:.5},
-  'pork-belly':{name:'Pork Belly',cat:'pork',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,ovenRate:.9,pull:{pellet:195,smoke:200,oven:200},final:200,rest:'20 min',notes:'Score fat cap in 1" crosshatch. Cube for burnt ends or keep whole for thick bacon slices.',servingLoss:.35,servingSize:.33},
-  'whole-chicken':{name:'Whole Chicken',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.58,smokeRate:.67,grillRate:.28,ovenRate:.52,pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'10 min',notes:'Spatchcock to cut time in half. Run pit at 300°F+ for crispy skin on pellet grills.',servingLoss:.35,servingSize:.40},
-  'chicken-thighs':{name:'Chicken Thighs',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.50,smokeRate:.57,grillRate:.22,ovenRate:.45,pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'5 min',notes:'Most forgiving poultry cut. 275°F for smoke ring, then crank heat for crispy skin finish.',servingLoss:.25,servingSize:.35},
-  'chicken-breast':{name:'Chicken Breast',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',pelletRate:.43,smokeRate:.50,grillRate:.18,ovenRate:.40,pull:{pellet:160,smoke:160,grill:160,oven:160},final:165,rest:'5 min',notes:'Brine for moisture. Very lean — pull at 160°F immediately and rest. Overcooking is the enemy.',servingLoss:.20,servingSize:.40,
+  // Pork loin: 250–275°F, ~20–25 min/lb → .38–.45 hrs/lb
+  'pork-loin':{name:'Pork Loin',cat:'pork',methods:['pellet','smoke','grill','reverse','oven'],donenessType:'pork-loin',
+    pelletRate:.42,smokeRate:.50,grillRate:.28,reverseRate:.50,ovenRate:.40,
+    pull:{pellet:140,smoke:140,grill:140,reverse:140,oven:140},final:145,rest:'10 min',
+    notes:'Very lean — don\'t overcook. Wrap in bacon to add fat or brine overnight.',
+    servingLoss:.15,servingSize:.35},
+  // Tenderloin: 1–1.5 lbs, 225°F → 45–60 min → .60–.75 hrs/lb
+  'pork-tenderloin':{name:'Pork Tenderloin',cat:'pork',methods:['pellet','smoke','grill','reverse','oven'],donenessType:'pork-loin',
+    pelletRate:.65,smokeRate:.75,grillRate:.22,reverseRate:.75,ovenRate:.55,
+    pull:{pellet:140,smoke:140,grill:140,reverse:140,oven:140},final:145,rest:'5 min',
+    notes:'Cooks fast. Silver skin must be removed before cooking. Butterfly for faster, even heat.',
+    servingLoss:.12,servingSize:.33},
+  // Spare ribs: time is method-based, not weight-based. 3-2-1 = 6 hrs
+  'spare-ribs':{name:'Spare Ribs / St. Louis',cat:'pork',methods:['pellet','smoke'],donenessType:'low-slow',
+    fixedCookMins:{pellet:330,smoke:360},
+    pull:{pellet:195,smoke:200},final:203,rest:'15 min',
+    notes:'3-2-1 method: 3 hrs smoke, 2 hrs wrapped, 1 hr sauced. Probe slides between bones at 195°F.',
+    servingLoss:.45,servingSize:.5},
+  // Baby backs: 2-2-1 = 5 hrs standard; 2-1-1 = 4 hrs for firmer texture
+  'baby-back':{name:'Baby Back Ribs',cat:'pork',methods:['pellet','smoke'],donenessType:'low-slow',
+    fixedCookMins:{pellet:270,smoke:300},
+    pull:{pellet:195,smoke:195},final:200,rest:'10 min',
+    notes:'2-2-1 for fall-off-the-bone; 2-1-1 for firmer competition bite. Thinner than spare ribs — watch for drying out. Bend test: cracks form when done.',
+    servingLoss:.40,servingSize:.5},
+  // Pork belly: 225°F, 4–6 hrs for a 4–5 lb piece → ~1.0–1.3 hrs/lb
+  'pork-belly':{name:'Pork Belly',cat:'pork',methods:['pellet','smoke','oven'],donenessType:'low-slow',
+    pelletRate:1.1,smokeRate:1.3,ovenRate:1.0,
+    pull:{pellet:195,smoke:200,oven:200},final:200,rest:'20 min',
+    notes:'Score fat cap in 1" crosshatch. Cube for burnt ends or keep whole for thick bacon slices.',
+    servingLoss:.35,servingSize:.33},
+  // ── POULTRY ───────────────────────────────────────────────────────────────
+  // Whole chicken at 275°F: 3–4 hrs for 4–5 lb bird → .65–.75 hrs/lb
+  'whole-chicken':{name:'Whole Chicken',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',
+    pelletRate:.65,smokeRate:.75,grillRate:.38,ovenRate:.55,
+    pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'10 min',
+    notes:'Spatchcock to cut time in half. Run pit at 300°F+ for crispy skin on pellet grills.',
+    servingLoss:.35,servingSize:.40},
+  // Thighs at 275°F: ~60–75 min for 3 lb batch → .40–.50 hrs/lb
+  'chicken-thighs':{name:'Chicken Thighs',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',
+    pelletRate:.42,smokeRate:.50,grillRate:.28,ovenRate:.38,
+    pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'5 min',
+    notes:'Most forgiving poultry cut. 275°F for smoke ring, then crank heat for crispy skin finish.',
+    servingLoss:.25,servingSize:.35},
+  // Breast at 250°F: boneless 6–8 oz = 30–40 min; per lb ~.52–.62 hrs
+  'chicken-breast':{name:'Chicken Breast',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',
+    pelletRate:.55,smokeRate:.62,grillRate:.28,ovenRate:.48,
+    pull:{pellet:160,smoke:160,grill:160,oven:160},final:165,rest:'5 min',
+    notes:'Brine for moisture. Very lean — pull at 160°F immediately and rest. Overcooking is the enemy.',
+    servingLoss:.20,servingSize:.40,
     boneOpts:{default:'boneless',options:[
       {v:'bone-in',l:'Bone-In / Skin-On',rateMult:1.25,methods:['pellet','smoke','grill','oven'],notes:'~25% longer cook time but bone protects meat from drying out. Better flavor and juiciness overall.'},
       {v:'boneless',l:'Boneless / Skinless',rateMult:1.0,methods:['pellet','smoke','grill','oven'],notes:'Cooks fastest. Pound to even thickness for consistent doneness across the whole breast.'}
     ]}},
-  'chicken-wings':{name:'Chicken Wings',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',fixedCookMins:{pellet:90,smoke:105,grill:30,oven:50},pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'0 min',notes:'Smoke at 250°F for 1.5 hrs, then crank to 400°F+ for 10–15 min to crisp the skin. Toss in sauce right off the grill.',servingLoss:.15,servingSize:.50},
-  'chicken-drumsticks':{name:'Chicken Drumsticks',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',fixedCookMins:{pellet:75,smoke:90,grill:35,oven:55},pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'5 min',notes:'Slash skin to let smoke and rub penetrate. Cook at 275°F — bone protects meat and adds flavor. Finish hot for crispy skin.',servingLoss:.22,servingSize:.40},
-  'whole-turkey':{name:'Whole Turkey',cat:'poultry',methods:['pellet','smoke','oven'],donenessType:'poultry',pelletRate:.52,smokeRate:.60,ovenRate:.48,pull:{pellet:160,smoke:162,oven:160},final:165,rest:'20–30 min',notes:'Spatchcock cuts time in half. Brine 24–48 hrs. Run 300–325°F for crispy skin on pellet.',servingLoss:.38,servingSize:.40},
-  'turkey-breast':{name:'Turkey Breast',cat:'poultry',methods:['pellet','smoke','oven'],donenessType:'poultry',pelletRate:.43,smokeRate:.50,ovenRate:.40,pull:{pellet:160,smoke:160,oven:160},final:165,rest:'15 min',notes:'Best smoked turkey option for smaller groups. Brine overnight. Compound butter under the skin.',servingLoss:.28,servingSize:.40,
+  'chicken-wings':{name:'Chicken Wings',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',
+    fixedCookMins:{pellet:90,smoke:105,grill:30,oven:50},
+    pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'0 min',
+    notes:'Smoke at 250°F for 1.5 hrs, then crank to 400°F+ for 10–15 min to crisp the skin. Toss in sauce right off the grill.',
+    servingLoss:.15,servingSize:.50},
+  'chicken-drumsticks':{name:'Chicken Drumsticks',cat:'poultry',methods:['pellet','smoke','grill','oven'],donenessType:'poultry',
+    fixedCookMins:{pellet:75,smoke:90,grill:35,oven:55},
+    pull:{pellet:160,smoke:162,grill:160,oven:160},final:165,rest:'5 min',
+    notes:'Slash skin to let smoke and rub penetrate. Cook at 275°F — bone protects meat and adds flavor. Finish hot for crispy skin.',
+    servingLoss:.22,servingSize:.40},
+  // Turkey at 275°F: ~20–25 min/lb → .35–.42 hrs/lb; offset at 225°F → .50 hrs/lb
+  'whole-turkey':{name:'Whole Turkey',cat:'poultry',methods:['pellet','smoke','oven'],donenessType:'poultry',
+    pelletRate:.38,smokeRate:.50,ovenRate:.32,
+    pull:{pellet:160,smoke:162,oven:160},final:165,rest:'20–30 min',
+    notes:'Spatchcock cuts time in half. Brine 24–48 hrs. Run 300–325°F for crispy skin on pellet.',
+    servingLoss:.38,servingSize:.40},
+  'turkey-breast':{name:'Turkey Breast',cat:'poultry',methods:['pellet','smoke','oven'],donenessType:'poultry',
+    pelletRate:.45,smokeRate:.55,ovenRate:.40,
+    pull:{pellet:160,smoke:160,oven:160},final:165,rest:'15 min',
+    notes:'Best smoked turkey option for smaller groups. Brine overnight. Compound butter under the skin.',
+    servingLoss:.28,servingSize:.40,
     boneOpts:{default:'bone-in',options:[
       {v:'bone-in',l:'Bone-In',rateMult:1.0,methods:['pellet','smoke','oven'],notes:'Better flavor and moisture retention. More impressive presentation. Self-bastes during the cook.'},
       {v:'boneless',l:'Boneless / Rolled',rateMult:.80,methods:['pellet','smoke','oven'],notes:'Cooks ~20% faster. Easy to slice uniform portions. Stuff with herbs or compound butter before rolling.'}
     ]}},
-  'lamb-leg':{name:'Leg of Lamb',cat:'lamb',methods:['pellet','smoke','grill','reverse','oven'],donenessType:'lamb-roast',pelletRate:.52,smokeRate:.60,grillRate:.18,reverseRate:.52,ovenRate:.50,pull:{pellet:128,smoke:130,grill:128,reverse:128,oven:128},final:135,rest:'15–20 min',notes:'Mediterranean herb crust pairs beautifully. Bone-in for low-and-slow; boneless/butterflied for grill or reverse sear.',servingLoss:.25,servingSize:.40,
+  // ── LAMB ──────────────────────────────────────────────────────────────────
+  // Leg of lamb at 225–250°F: 7 lb bone-in = 3.5–4 hrs → .50–.57 hrs/lb
+  'lamb-leg':{name:'Leg of Lamb',cat:'lamb',methods:['pellet','smoke','grill','reverse','oven'],donenessType:'lamb-roast',
+    pelletRate:.52,smokeRate:.60,grillRate:.18,reverseRate:.52,ovenRate:.50,
+    pull:{pellet:128,smoke:130,grill:128,reverse:128,oven:128},final:135,rest:'15–20 min',
+    notes:'Mediterranean herb crust pairs beautifully. Bone-in for low-and-slow; boneless/butterflied for grill or reverse sear.',
+    servingLoss:.25,servingSize:.40,
     boneOpts:{default:'bone-in',options:[
       {v:'bone-in',l:'Bone-In',rateMult:1.0,methods:['pellet','smoke','oven'],notes:'Best for low-and-slow smoke or oven roast. Bone acts as heat sink for even cooking and rich flavor. Classic Sunday roast showpiece.'},
       {v:'boneless',l:'Boneless / Butterflied',rateMult:.78,methods:['pellet','smoke','grill','reverse','oven'],notes:'Cooks ~22% faster. Opens flat for even cooking on the grill. Ideal for reverse sear or direct grill. Stuff with herbs, garlic, and feta before rolling.'}
     ]}},
-  'lamb-shoulder':{name:'Lamb Shoulder',cat:'lamb',methods:['pellet','smoke','oven'],donenessType:'low-slow',pelletRate:.87,smokeRate:1.0,ovenRate:.87,pull:{pellet:195,smoke:200,oven:200},final:203,rest:'30 min',notes:'The lamb equivalent of pork shoulder. Pulls beautifully. Middle Eastern spices work incredibly well.',servingLoss:.35,servingSize:.40},
-  'lamb-chops':{name:'Lamb Chops / Rack',cat:'lamb',methods:['pellet','smoke','grill','reverse'],donenessType:'lamb-chop',pelletRate:.22,smokeRate:.25,grillRate:.10,reverseRate:.30,pull:{pellet:125,smoke:125,grill:125,reverse:125},final:130,rest:'5 min',notes:'Medium-rare is ideal. High heat sear for crust. Frenched rack makes great presentation.',servingLoss:.30,servingSize:.45},
-  'salmon':{name:'Salmon Fillet',cat:'seafood',methods:['pellet','smoke','grill'],donenessType:'salmon',pelletRate:.22,smokeRate:.25,grillRate:.12,pull:{pellet:115,smoke:115,grill:120},final:125,rest:'3 min',notes:'Start skin-side down. Cedar plank adds great flavor on pellet/grill. 225°F for low smoke.',servingLoss:.10,servingSize:.35},
-  'whole-fish':{name:'Whole Fish',cat:'seafood',methods:['pellet','smoke','grill'],donenessType:'fish',pelletRate:.30,smokeRate:.35,grillRate:.15,pull:{pellet:140,smoke:140,grill:140},final:145,rest:'5 min',notes:'Score the flesh 3x per side. Stuff cavity with lemon, herbs, and garlic for great aroma.',servingLoss:.50,servingSize:.33},
-  'smoked-burgers':{name:'Smoked Burgers',cat:'beef',methods:['pellet','smoke','grill'],donenessType:'burger',fixedCookMins:{pellet:45,smoke:50,grill:18},pull:{pellet:155,smoke:155,grill:155},final:160,rest:'3 min',notes:'Smoke at 225°F for 30 min to build smoke ring, then crank to 500°F+ and sear 2–3 min per side. Don\'t press the patty. Ground beef MUST reach 160°F.',servingLoss:.20,servingSize:.25},
-  'shrimp':{name:'Wild Shrimp',cat:'seafood',methods:['grill','pellet'],donenessType:'fish',fixedCookMins:{grill:6,pellet:8},pull:{grill:115,pellet:115},final:120,rest:'0 min',notes:'Use a perforated grill pan at 450°F. Pull when they curl into a C shape and turn opaque — a tight O = overcooked.',servingLoss:.05,servingSize:.25}
+  // Lamb shoulder: similar to pork shoulder, 225°F → 1.0–1.2 hrs/lb (5 lb = 5–6 hrs)
+  'lamb-shoulder':{name:'Lamb Shoulder',cat:'lamb',methods:['pellet','smoke','oven'],donenessType:'low-slow',
+    pelletRate:1.0,smokeRate:1.2,ovenRate:1.0,
+    pull:{pellet:195,smoke:200,oven:200},final:203,rest:'30 min',
+    notes:'The lamb equivalent of pork shoulder. Pulls beautifully. Middle Eastern spices work incredibly well.',
+    servingLoss:.35,servingSize:.40},
+  // Lamb chops: 1.5 lb rack at 225°F → ~35–45 min to 110°F → .38–.48 hrs/lb
+  'lamb-chops':{name:'Lamb Chops / Rack',cat:'lamb',methods:['pellet','smoke','grill','reverse'],donenessType:'lamb-chop',
+    pelletRate:.38,smokeRate:.42,grillRate:.15,reverseRate:.48,
+    pull:{pellet:125,smoke:125,grill:125,reverse:125},final:130,rest:'5 min',
+    notes:'Medium-rare is ideal. High heat sear for crust. Frenched rack makes great presentation.',
+    servingLoss:.30,servingSize:.45},
+  // ── SEAFOOD ───────────────────────────────────────────────────────────────
+  // Salmon: 1.5 lb fillet at 225°F → 45–55 min → .50–.60 hrs/lb
+  'salmon':{name:'Salmon Fillet',cat:'seafood',methods:['pellet','smoke','grill'],donenessType:'salmon',
+    pelletRate:.52,smokeRate:.60,grillRate:.25,
+    pull:{pellet:115,smoke:115,grill:120},final:125,rest:'3 min',
+    notes:'Start skin-side down. Cedar plank adds great flavor on pellet/grill. 225°F for low smoke.',
+    servingLoss:.10,servingSize:.35},
+  // Whole fish: 2 lb at 225°F → ~45–55 min → .38–.45 hrs/lb
+  'whole-fish':{name:'Whole Fish',cat:'seafood',methods:['pellet','smoke','grill'],donenessType:'fish',
+    pelletRate:.38,smokeRate:.45,grillRate:.20,
+    pull:{pellet:140,smoke:140,grill:140},final:145,rest:'5 min',
+    notes:'Score the flesh 3x per side. Stuff cavity with lemon, herbs, and garlic for great aroma.',
+    servingLoss:.50,servingSize:.33},
+  'smoked-burgers':{name:'Smoked Burgers',cat:'beef',methods:['pellet','smoke','grill'],donenessType:'burger',
+    fixedCookMins:{pellet:45,smoke:50,grill:18},
+    pull:{pellet:155,smoke:155,grill:155},final:160,rest:'3 min',
+    notes:'Smoke at 225°F for 30 min to build smoke ring, then crank to 500°F+ and sear 2–3 min per side. Don\'t press the patty. Ground beef MUST reach 160°F.',
+    servingLoss:.20,servingSize:.25},
+  'shrimp':{name:'Wild Shrimp',cat:'seafood',methods:['grill','pellet'],donenessType:'fish',
+    fixedCookMins:{grill:6,pellet:8},
+    pull:{grill:115,pellet:115},final:120,rest:'0 min',
+    notes:'Use a perforated grill pan at 450°F. Pull when they curl into a C shape and turn opaque — a tight O = overcooked.',
+    servingLoss:.05,servingSize:.25}
 };
 
 const TEMP_TABLE = [
@@ -559,6 +892,55 @@ const RUBS = [
   {name:'Santa Maria Rub',tags:'Beef · Tri-Tip · Lamb',ings:[{n:'Kosher Salt',perLb:.5,unit:'tsp'},{n:'Black Pepper',perLb:.4,unit:'tsp'},{n:'Garlic Powder',perLb:.3,unit:'tsp'},{n:'Dried Parsley',perLb:.2,unit:'tsp'}],notes:'The classic Central California coast rub. Simple and bold. Apply 1 hr before cook over a red oak fire.'},
 ];
 
+const SAUCES=[
+  {name:'Kansas City Classic',region:'Kansas City, MO',type:'Sweet & Smoky',pairs:'Ribs · Pulled Pork · Chicken · Burnt Ends',yield:'~2 cups',
+   notes:'Thick, sweet, tomato-forward. Apply the last 30 min of the cook or serve on the side.',
+   cook:'Combine all in a saucepan. Simmer 20–25 min over medium-low heat, stirring often, until slightly thickened. Cool before using. Keeps refrigerated 3 weeks.',
+   ings:[{n:'Ketchup',b:1,u:'cup'},{n:'Apple Cider Vinegar',b:.25,u:'cup'},{n:'Brown Sugar',b:3,u:'tbsp'},{n:'Molasses',b:2,u:'tbsp'},{n:'Worcestershire',b:1,u:'tbsp'},{n:'Smoked Paprika',b:1,u:'tsp'},{n:'Garlic Powder',b:1,u:'tsp'},{n:'Onion Powder',b:.5,u:'tsp'},{n:'Cayenne',b:.25,u:'tsp'}]},
+  {name:'Eastern NC Vinegar Mop',region:'Eastern North Carolina',type:'Thin & Tangy',pairs:'Whole Hog · Pulled Pork',yield:'~2 cups',
+   notes:'No tomato. Pure acid cuts through fat and tenderizes. Mop the meat every 45 min or toss pulled pork in it before serving.',
+   cook:'Combine all and stir until sugar and salt dissolve. No cooking required. Store at room temp up to 2 weeks.',
+   ings:[{n:'Apple Cider Vinegar',b:1,u:'cup'},{n:'White Vinegar',b:.5,u:'cup'},{n:'Water',b:.25,u:'cup'},{n:'Brown Sugar',b:1,u:'tbsp'},{n:'Red Pepper Flakes',b:1,u:'tsp'},{n:'Black Pepper',b:1,u:'tsp'},{n:'Kosher Salt',b:1,u:'tsp'}]},
+  {name:'Lexington Dip',region:'Western NC',type:'Vinegar-Tomato',pairs:'Pork Shoulder · Ribs',yield:'~2 cups',
+   notes:'The bridge between eastern vinegar and KC tomato. Thin, tangy, with just a hint of sweetness.',
+   cook:'Combine all. Heat over medium until sugar dissolves (~5 min). Serve warm or at room temp.',
+   ings:[{n:'Apple Cider Vinegar',b:1,u:'cup'},{n:'Ketchup',b:.5,u:'cup'},{n:'Water',b:.25,u:'cup'},{n:'Brown Sugar',b:2,u:'tbsp'},{n:'Red Pepper Flakes',b:.5,u:'tsp'},{n:'Black Pepper',b:.5,u:'tsp'},{n:'Kosher Salt',b:.5,u:'tsp'}]},
+  {name:'South Carolina Gold',region:'South Carolina',type:'Mustard-Based',pairs:'Pulled Pork · Chicken · Ribs',yield:'~1½ cups',
+   notes:'Bright and tangy. Classic Midlands SC. Works especially well piled over pulled pork on a bun.',
+   cook:'Whisk together in a saucepan. Simmer 10 min over low heat — do not boil or it can break. Cool before using.',
+   ings:[{n:'Yellow Mustard',b:.75,u:'cup'},{n:'Apple Cider Vinegar',b:.25,u:'cup'},{n:'Brown Sugar',b:3,u:'tbsp'},{n:'Honey',b:2,u:'tbsp'},{n:'Worcestershire',b:1,u:'tbsp'},{n:'Hot Sauce',b:1,u:'tsp'},{n:'Garlic Powder',b:.5,u:'tsp'},{n:'Black Pepper',b:.5,u:'tsp'}]},
+  {name:'Alabama White Sauce',region:'Northern Alabama',type:'Mayo-Based',pairs:'Chicken · Turkey · Smoked Fish',yield:'~2 cups',
+   notes:"Big Bob Gibson's original. Toss hot chicken straight from the grill or use as a dipping sauce. Serve cold — do not heat.",
+   cook:'Whisk all together. Refrigerate at least 1 hr before using for flavors to meld. Keeps refrigerated 1 week.',
+   ings:[{n:"Duke's Mayo",b:1,u:'cup'},{n:'Apple Cider Vinegar',b:.25,u:'cup'},{n:'Lemon Juice',b:2,u:'tbsp'},{n:'Prepared Horseradish',b:1,u:'tbsp'},{n:'Coarse Black Pepper',b:1,u:'tsp'},{n:'Garlic Powder',b:.5,u:'tsp'},{n:'Cayenne',b:.25,u:'tsp'},{n:'Kosher Salt',b:.5,u:'tsp'}]},
+  {name:'Texas Brisket Mop',region:'Texas',type:'Thin Cook Sauce',pairs:'Brisket · Beef Ribs · Chuck Roast',yield:'~3 cups',
+   notes:'A cook sauce, not a serving sauce. Applied with a mop brush every 45–60 min on an offset smoker to keep bark moist and build flavor layers.',
+   cook:'Combine in a saucepan. Heat over medium until butter melts. Keep warm on the pit side during the cook.',
+   ings:[{n:'Beef Broth',b:1,u:'cup'},{n:'Beer (lager)',b:.5,u:'cup'},{n:'Apple Cider Vinegar',b:.5,u:'cup'},{n:'Worcestershire',b:.25,u:'cup'},{n:'Butter (melted)',b:2,u:'tbsp'},{n:'Garlic Powder',b:1,u:'tsp'},{n:'Black Pepper',b:1,u:'tsp'},{n:'Kosher Salt',b:1,u:'tsp'}]},
+];
+
+const COOLER_HOLD=[
+  {cut:'Brisket / Chuck Roast',icon:'🥩',min:2,max:6,tip:'Wrap tight in butcher paper then foil. Pre-heat cooler with boiling water (dump first), pack old towels around it. Holds above 140°F for 4–6 hrs in a quality cooler.'},
+  {cut:'Pork Shoulder / Butt',icon:'🐖',min:2,max:6,tip:'One of the best cuts for a long hold — the continued gentle heat makes it pull even more cleanly. 6 hrs is realistic in a good cooler.'},
+  {cut:'Ribs',icon:'🍖',min:.5,max:1.5,tip:'Holds poorly. Sauce gets tacky, bark softens. Tent loosely with foil on a sheet pan. Serve within 30–60 min.'},
+  {cut:'Whole Chicken / Turkey',icon:'🍗',min:.25,max:1,tip:'Must stay above 140°F. 30–60 min max. Skin loses crispness — re-crisp in a 400°F oven or hot grill for 5 min if needed.'},
+  {cut:'Steaks / Tri-Tip / Chops',icon:'🥩',min:0,max:.25,tip:'5–15 min rest only, tented on a wire rack off the cutting board. Steaks don\'t hold — serve immediately after resting.'},
+  {cut:'Lamb Shoulder (slow cook)',icon:'🐑',min:1,max:3,tip:'Similar to pork shoulder. Holds 1–3 hrs well. Wrap tight and pack in towels in a warm cooler.'},
+  {cut:'Salmon / Whole Fish',icon:'🐟',min:0,max:.1,tip:'No cooler hold. Food safety risk increases fast. Serve within 5–10 min off the grill.'},
+];
+
+const INJECTIONS=[
+  {name:'Pork Competition Injection',pairs:'Pork Shoulder · Pork Loin',
+   notes:'Inject 2–3 hrs before the cook or the night before. Use a grid pattern every 1–2 inches, pulling the needle out slowly while pressing the plunger. 10% of meat weight is the standard volume.',
+   ings:[{n:'Apple Juice',b:8,u:'oz'},{n:'Water',b:4,u:'oz'},{n:'Butter (melted)',b:2,u:'tbsp'},{n:'Brown Sugar',b:2,u:'tbsp'},{n:'Kosher Salt',b:1,u:'tsp'},{n:'Worcestershire',b:1,u:'tbsp'}],baseOz:16},
+  {name:'Brisket Injection',pairs:'Brisket · Chuck Roast · Beef Short Ribs',
+   notes:'Inject with the grain of the meat. Use a large-bore needle. Inject slowly — pull back while pushing plunger to distribute evenly. Avoid injecting near the fat cap.',
+   ings:[{n:'Beef Broth',b:10,u:'oz'},{n:'Worcestershire',b:2,u:'oz'},{n:'Beef Tallow (melted)',b:2,u:'tbsp'},{n:'Garlic Powder',b:1,u:'tsp'},{n:'Onion Powder',b:.5,u:'tsp'},{n:'Kosher Salt',b:.5,u:'tsp'}],baseOz:16},
+  {name:'Poultry Injection',pairs:'Whole Chicken · Turkey · Turkey Breast',
+   notes:'Inject breasts from multiple angles, then thighs and legs. For whole birds, inject each quadrant separately. Can inject up to 24 hrs ahead.',
+   ings:[{n:'Chicken Broth',b:8,u:'oz'},{n:'Butter (melted)',b:4,u:'tbsp'},{n:'Lemon Juice',b:2,u:'tbsp'},{n:'Garlic Powder',b:1,u:'tsp'},{n:'Dried Thyme',b:.5,u:'tsp'},{n:'Kosher Salt',b:.5,u:'tsp'}],baseOz:12},
+];
+
 const WOODS = [
   {name:'Post Oak',smoke:'Medium',pairs:'Brisket, Beef, Lamb',desc:'The wood of choice at legendary Texas BBQ joints. Cleaner and more refined than red oak. Earthy and clean.'},
   {name:'Oak',smoke:'Medium',pairs:'Brisket, Beef Ribs, Lamb, Pork',desc:'The backbone of Texas BBQ. Earthy, substantial smoke that handles long cooks without overpowering.'},
@@ -584,13 +966,13 @@ const GUIDES = [
     {t:'Rest',d:'Rest wrapped in a dry cooler with towels for 1–4 hrs. Redistributes juices and finishes cooking. Never skip this step.'},
   ]},
   {title:'Pork Shoulder / Pulled Pork',steps:[
-    {t:'Prep',d:'Trim excess fat but leave ¼" cap. Inject with apple juice + butter + salt for moisture. Rub generously — get into all crevices.'},
-    {t:'Smoke',d:'225°F fat side up. Apple, cherry, or hickory wood. The fat cap bastes the meat as it renders down slowly.'},
-    {t:'Mop Every 45 Min',d:'Starting at the 2-hr mark, spray or mop with apple cider vinegar every 45 min. ACV tenderizes the bark, adds tang, and keeps the surface moist without steaming the meat.'},
-    {t:'The Stall',d:'Expect a stall at 150–170°F where temp plateaus for hours. Normal — collagen converts to gelatin. Stay the course or wrap to push through.'},
-    {t:'Wrap',d:'At 165°F wrap in foil with a splash of apple cider vinegar. Crank to 275°F to power through the stall.'},
-    {t:'Pull',d:'At 200–205°F it should shred with finger pressure. The bone pulls out clean with zero resistance.'},
-    {t:'Rest & Shred',d:'Rest 30–60 min. Shred while warm. Mix in pan juices and light sauce. Serve the money muscle as a whole piece separately.'},
+    {t:'Timing by Weight',d:'Plan ~1–1.5 hrs/lb at 225°F. Wrap at 160–165°F, pull at 200–205°F. Small (3 lbs): 3.5–5 hrs. Medium (5 lbs): 6–7.5 hrs. Large (8+ lbs): 9–12+ hrs.'},
+    {t:'Step 1: Prep & Preheat',d:'Preheat to 225°F with hickory, pecan, or a fruitwood blend. Trim fat cap to a uniform ¼". Apply a thin binder — yellow mustard or olive oil — to hold seasoning. Apply rub generously on all sides. Let sit 15–20 min until the rub looks wet.'},
+    {t:'Step 2: Smoke Phase (to 165°F)',d:'Insert probe into the thickest part, avoiding bone. Place fat-side up directly on grates. Smoke undisturbed to 160–165°F internal. Small 3 lb cut: ~2.5–3 hrs. Large 8 lb cut: ~5–7 hrs. Don\'t peek.'},
+    {t:'Step 3: Foil Wrap (165°F → 201°F)',d:'Place on two layers of heavy-duty foil. Add liquid based on size — 3 lbs: 2 Tbsp ACV + 1 Tbsp water; 5 lbs: 3 Tbsp ACV + 2 Tbsp apple juice; 8+ lbs: ¼ cup ACV + ¼ cup apple juice. The acid breaks down heavy fats and keeps the meat tender. Wrap airtight — crimp all edges so no steam escapes. Return to grill until 201°F.'},
+    {t:'Step 4: Vent & Drain (Critical)',d:'Remove from grill at 201°F. Immediately open the top of the foil package — watch for hot steam. Let vent 10 min. This stops cooking and prevents the meat from going mushy. Drain all liquid into a glass measuring cup or bowl. Do not throw this away.'},
+    {t:'Step 5: Rest',d:'Reseal foil loosely around the pork. Rest 45–60 min. Leave on the counter, or place in an insulated cooler to hold hot for a few hours if needed.'},
+    {t:'Step 6: Defat & Shred',d:'Look at the drained liquid: clear heavy grease floats to the top, dark flavorful au jus sits at the bottom. Skim off and discard the grease layer. Shred with two forks or meat claws — discard any large chunks of unrendered fat. Pour the defatted au jus back over the shredded meat. Maximum juiciness, zero greasy mouthfeel. Toss with BBQ sauce if desired.'},
   ]},
   {title:'Ribs — 3-2-1 / 2-2-1 / 2-1-1 Method',steps:[
     {t:'Prep',d:'Remove membrane from bone side — paper towel for grip. Trim flap meat. Apply yellow mustard as binder, rub generously. Rest 1 hr min.'},
@@ -739,35 +1121,21 @@ function autoAdvancePhase(t,totalElapsedMs){
 function updateCookOptions(){
   const k=document.getElementById('ct-meat').value;
   const d=MEAT[k];
-  const boneRow=document.getElementById('ct-bone-row');
   const boneSel=document.getElementById('ct-bone');
-  const boneNote=document.getElementById('ct-bone-note');
   if(d.boneOpts){
-    boneRow.style.display='';
     boneSel.innerHTML=d.boneOpts.options.map(o=>`<option value="${o.v}">${o.l}</option>`).join('');
     boneSel.value=d.boneOpts.default;
-    const def=d.boneOpts.options.find(o=>o.v===d.boneOpts.default);
-    if(def){boneNote.innerHTML=def.notes;boneNote.style.display='';}
-  }else{
-    boneRow.style.display='none';
-    boneNote.style.display='none';
   }
   rebuildMethodDoneness();
-  calculateCookTime();
-  renderGuide(k);
 }
 
 function onBoneChange(){
   const k=document.getElementById('ct-meat').value;
   const d=MEAT[k];
-  const boneNote=document.getElementById('ct-bone-note');
   if(d.boneOpts){
     const v=document.getElementById('ct-bone').value;
-    const opt=d.boneOpts.options.find(o=>o.v===v);
-    if(opt){boneNote.innerHTML=opt.notes;boneNote.style.display='';}
+    rebuildMethodDoneness();
   }
-  rebuildMethodDoneness();
-  calculateCookTime();
 }
 
 function rebuildMethodDoneness(){
@@ -1075,9 +1443,14 @@ function tickTimer(id){
   const elapsed=t.elapsedMs+(Date.now()-t.startTs);
   const totalMs=phase.mins*60000;
   if(elapsed>=totalMs){
+    const completedPhaseName=phase.name;
     t.elapsedMs=0;t.startTs=Date.now();t.phaseIdx++;
-    playBeep();
-    if(t.phaseIdx>=t.phases.length){t.running=false;playBeep();playBeep();}
+    if(t.phaseIdx>=t.phases.length){
+      t.running=false;
+      fireCookDoneAlert(t.name);
+    } else {
+      firePhaseAlert(t.name,completedPhaseName);
+    }
     renderTimers();
     if(t.running)setTimeout(()=>tickTimer(id),500);
     return;
@@ -1094,8 +1467,62 @@ function tickTimer(id){
   setTimeout(()=>tickTimer(id),500);
 }
 
+// ── ALERTS & WAKE LOCK ──────────────────────────────────
+let wakeLock=null;
+
+async function toggleWakeLock(){
+  const btn=document.getElementById('wakelock-btn');
+  if(wakeLock){
+    try{await wakeLock.release();}catch(e){}
+    wakeLock=null;
+    if(btn){btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';btn.textContent='💤 Keep Awake';}
+  } else {
+    if('wakeLock' in navigator){
+      try{
+        wakeLock=await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release',()=>{wakeLock=null;if(btn){btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';btn.textContent='💤 Keep Awake';}});
+        if(btn){btn.style.color='var(--accent)';btn.style.borderColor='var(--accent)';btn.textContent='👁 Screen On';}
+      }catch(e){if(btn)btn.textContent='⚠️ Not Supported';}
+    } else {
+      if(btn)btn.textContent='⚠️ Not Supported';
+    }
+  }
+}
+
 function playBeep(){
-  try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.4;o.start();g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.6);o.stop(c.currentTime+.6);}catch(e){}
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [0,.35,.7].forEach(t=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.type='square';o.frequency.value=660;
+      g.gain.setValueAtTime(.35,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.32);
+      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.32);
+    });
+  }catch(e){}
+}
+
+function firePhaseAlert(cookName,phaseName){
+  playBeep();
+  if(navigator.vibrate)navigator.vibrate([300,100,300,100,600]);
+  if('Notification' in window&&Notification.permission==='granted'){
+    try{new Notification('🔥 '+cookName,{body:'Phase complete: '+phaseName+' — time for the next step!',tag:'bbq-phase'});}catch(e){}
+  }
+}
+
+function fireCookDoneAlert(cookName){
+  playBeep();setTimeout(playBeep,600);
+  if(navigator.vibrate)navigator.vibrate([500,200,500,200,1000]);
+  if('Notification' in window&&Notification.permission==='granted'){
+    try{new Notification('✅ '+cookName+' is DONE!',{body:'Time to rest & carve. Remove from heat now.',tag:'bbq-done'});}catch(e){}
+  }
+}
+
+async function requestNotifPermission(){
+  if('Notification' in window&&Notification.permission==='default'){
+    try{await Notification.requestPermission();}catch(e){}
+  }
 }
 
 // ── SALT ──────────────────────────────────────────────
@@ -1171,7 +1598,7 @@ function renderStyles(){
 
 // ── TAB ───────────────────────────────────────────────
 
-const TAB_LABELS={'cook':'🍖 Cook','timer':'⏱ Timer','temps':'🌡 Temps','salt':'🧂 Salt','rubs':'🌶 Rubs','wood':'🪵 Wood','styles':'🌎 Styles'};
+const TAB_LABELS={'cook':'🍖 Cook','timer':'⏱ Timer','temps':'🌡 Temps','salt':'🧂 Salt','rubs':'🌶 Rubs','sauces':'🫙 Sauces','wood':'🪵 Wood','styles':'🌎 Styles'};
 
 function showTab(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -1199,14 +1626,459 @@ function closeNavDropdown(){
   document.getElementById('nav-chevron').classList.remove('open');
 }
 
+// ── WIZARD ────────────────────────────────────────────
+
+const METHOD_DESC={
+  pellet:'Set-and-forget consistency. Best for long cooks.',
+  smoke:'Offset or charcoal. Heaviest bark and smoke flavor.',
+  grill:'Direct high heat. Fast cooks and searing.',
+  reverse:'Low smoke first, then ripping hot sear.',
+  oven:'Indoor fallback. Precise temp, no smoke flavor.'
+};
+
+const MEAT_CATS=[
+  {label:'Beef',emoji:'🥩',keys:['brisket','brisket-flat','chuck-roast','ribeye','ny-strip','tri-tip','beef-ribs','beef-short-ribs','smoked-burgers']},
+  {label:'Pork',emoji:'🐖',keys:['pork-shoulder','pork-loin','pork-tenderloin','spare-ribs','baby-back','pork-belly']},
+  {label:'Poultry',emoji:'🍗',keys:['whole-chicken','chicken-thighs','chicken-breast','chicken-wings','chicken-drumsticks','whole-turkey','turkey-breast']},
+  {label:'Lamb',emoji:'🐑',keys:['lamb-leg','lamb-shoulder','lamb-chops']},
+  {label:'Seafood',emoji:'🐟',keys:['salmon','whole-fish','shrimp']},
+];
+
+let wizState={step:1,meatCat:null,meat:null,method:null,weight:10,unit:'lbs',doneness:null,bone:null,dinner:'18:00',people:6,ambient:70,windy:false};
+let wizAllMode=false;
+
+function wizInit(){
+  wizRenderProgress();
+  wizRenderCuts();
+}
+
+function wizRenderProgress(){
+  const steps=['Cut','Method','Weight','Time'];
+  const s=wizState.step;
+  let t='',l='';
+  steps.forEach((name,i)=>{
+    const n=i+1;
+    const cls=n<s?'done':n===s?'active':'idle';
+    t+=`<div class="wiz-dot ${cls}">${cls==='done'?'✓':n}</div>`;
+    if(i<steps.length-1)t+=`<div class="wiz-line${n<s?' done':''}"></div>`;
+    l+=`<div class="wiz-step-lbl${n===s?' active':''}">${name}</div>`;
+  });
+  document.getElementById('wiz-track').innerHTML=t;
+  document.getElementById('wiz-labels').innerHTML=l;
+}
+
+function wizShowStep(n){
+  wizState.step=n;
+  if(!wizAllMode){
+    [1,2,3,4].forEach(i=>{
+      const el=document.getElementById('wiz-s'+i);
+      if(el)el.style.display=i===n?'':'none';
+    });
+  }
+  wizRenderProgress();
+  if(n===2)wizRenderMethods();
+  if(n===3){wizRenderBone();wizRenderDoneness();wizUpdateSalt();}
+  if(n===4)wizRenderS4Sub();
+  window.scrollTo(0,0);
+}
+
+function wizGo(n){
+  if(n>wizState.step){
+    if(wizState.step===1&&!wizState.meat)return;
+    if(wizState.step===2&&!wizState.method)return;
+  }
+  wizShowStep(n);
+}
+
+function wizSetCat(label){
+  wizState.meatCat=label;
+  wizRenderCuts();
+}
+
+function wizRenderCuts(){
+  const el=document.getElementById('wiz-cut-list');
+  // No category selected — show category picker
+  if(!wizState.meatCat){
+    let html='<div class="wiz-step-sub" style="margin-bottom:14px">Choose a category</div>';
+    MEAT_CATS.forEach(cat=>{
+      html+=`<div class="wiz-cat-card" onclick="wizSetCat('${cat.label}')">
+        <span class="wiz-cat-emoji">${cat.emoji}</span>
+        <span class="wiz-cat-name">${cat.label}</span>
+        <span class="wiz-cat-arr">›</span>
+      </div>`;
+    });
+    el.innerHTML=html;
+    return;
+  }
+  // Category selected — show cuts for that category
+  const cat=MEAT_CATS.find(c=>c.label===wizState.meatCat);
+  let html=`<div class="wiz-cat-back" onclick="wizState.meatCat=null;wizState.meat=null;document.getElementById('wiz-s1-next').disabled=true;wizRenderCuts()">← ${cat.emoji} ${cat.label}</div>`;
+  cat.keys.forEach(k=>{
+    const m=MEAT[k];if(!m)return;
+    const sel=wizState.meat===k;
+    html+=`<div class="wiz-chip${sel?' sel':''}" onclick="wizSetMeat('${k}')">
+      <div class="wiz-chip-info"><div class="wiz-chip-name">${m.name}</div></div>
+      <div class="wiz-radio ${sel?'sel':'idle'}">${sel?'✓':''}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function wizSetMeat(k){
+  wizState.meat=k;wizState.method=null;wizState.doneness=null;wizState.bone=null;
+  document.getElementById('ct-meat').value=k;
+  updateCookOptions();
+  const d=MEAT[k];
+  const opts=DONENESS_SETS[d.donenessType];
+  if(opts&&opts.length>0){wizState.doneness=opts[0].v;document.getElementById('ct-doneness').value=opts[0].v;}
+  if(d.boneOpts){wizState.bone=d.boneOpts.default;document.getElementById('ct-bone').value=d.boneOpts.default;}
+  const s1n=document.getElementById('wiz-s1-next');if(s1n)s1n.disabled=false;
+  wizRenderCuts();
+  if(!wizAllMode)setTimeout(()=>wizShowStep(2),120);
+}
+
+function wizRenderMethods(){
+  const d=MEAT[wizState.meat];if(!d)return;
+  const bopt=d.boneOpts?d.boneOpts.options.find(o=>o.v===(wizState.bone||d.boneOpts.default)):null;
+  const methods=(bopt&&bopt.methods)?bopt.methods:d.methods;
+  let html='';
+  methods.forEach(m=>{
+    const sel=wizState.method===m;
+    html+=`<div class="wiz-chip${sel?' sel':''}" onclick="wizSetMethod('${m}')">
+      <div class="wiz-chip-info">
+        <div class="wiz-chip-name">${ML[m]}</div>
+        <div class="wiz-chip-desc">${METHOD_DESC[m]||''}</div>
+      </div>
+      <div class="wiz-radio ${sel?'sel':'idle'}">${sel?'✓':''}</div>
+    </div>`;
+  });
+  document.getElementById('wiz-method-list').innerHTML=html;
+  const sub=document.getElementById('wiz-s2-sub');
+  if(sub&&MEAT[wizState.meat])sub.textContent=MEAT[wizState.meat].name;
+}
+
+function wizSetMethod(m){
+  wizState.method=m;
+  document.getElementById('ct-method').value=m;
+  const s2n=document.getElementById('wiz-s2-next');if(s2n)s2n.disabled=false;
+  wizRenderMethods();
+  if(!wizAllMode)setTimeout(()=>wizShowStep(3),120);
+}
+
+function wizRenderBone(){
+  const d=MEAT[wizState.meat];
+  const sec=document.getElementById('wiz-bone-section');
+  if(!d||!d.boneOpts){sec.style.display='none';return;}
+  sec.style.display='';
+  let html='';
+  d.boneOpts.options.forEach(o=>{
+    const sel=(wizState.bone||d.boneOpts.default)===o.v;
+    html+=`<div class="wiz-chip${sel?' sel':''}" onclick="wizSetBone('${o.v}')">
+      <div class="wiz-chip-info">
+        <div class="wiz-chip-name">${o.l}</div>
+        <div class="wiz-chip-desc">${o.notes||''}</div>
+      </div>
+      <div class="wiz-radio ${sel?'sel':'idle'}">${sel?'✓':''}</div>
+    </div>`;
+  });
+  document.getElementById('wiz-bone-list').innerHTML=html;
+}
+
+function wizSetBone(v){
+  wizState.bone=v;
+  document.getElementById('ct-bone').value=v;
+  onBoneChange();
+  wizRenderBone();
+  wizRenderMethods();
+}
+
+function wizRenderDoneness(){
+  const d=MEAT[wizState.meat];if(!d)return;
+  const opts=DONENESS_SETS[d.donenessType];
+  const sec=document.getElementById('wiz-doneness-section');
+  if(!opts||opts.length<=1){sec.style.display='none';return;}
+  sec.style.display='';
+  let html='';
+  opts.forEach(o=>{
+    const sel=(wizState.doneness||opts[0].v)===o.v;
+    html+=`<div class="wiz-chip${sel?' sel':''}" onclick="wizSetDoneness('${o.v}')">
+      <div class="wiz-chip-info"><div class="wiz-chip-name">${o.l}</div></div>
+      <div class="wiz-radio ${sel?'sel':'idle'}">${sel?'✓':''}</div>
+    </div>`;
+  });
+  document.getElementById('wiz-doneness-list').innerHTML=html;
+  const sub=document.getElementById('wiz-s3-sub');
+  if(sub&&MEAT[wizState.meat])sub.textContent=MEAT[wizState.meat].name+' · '+ML[wizState.method];
+}
+
+function wizSetDoneness(v){
+  wizState.doneness=v;
+  document.getElementById('ct-doneness').value=v;
+  wizRenderDoneness();
+}
+
+function wizWeightAdj(d){
+  const step=wizState.unit==='kg'?.5:1;
+  const min=wizState.unit==='kg'?.5:1;
+  wizState.weight=Math.max(min,+(wizState.weight+d*step).toFixed(1));
+  const el=document.getElementById('wiz-weight-display');
+  el.value=wizState.weight;
+  document.getElementById('ct-weight').value=wizState.weight;
+  wizUpdateSalt();
+}
+
+function wizWeightTyped(v){
+  const parsed=parseFloat(v);
+  if(!isNaN(parsed)&&parsed>0){
+    wizState.weight=parsed;
+    document.getElementById('ct-weight').value=parsed;
+    wizUpdateSalt();
+  }
+}
+
+function wizWeightBlur(el){
+  const min=wizState.unit==='kg'?.5:1;
+  const parsed=parseFloat(el.value);
+  const safe=isNaN(parsed)||parsed<min?min:+parsed.toFixed(1);
+  wizState.weight=safe;
+  el.value=safe;
+  document.getElementById('ct-weight').value=safe;
+  wizUpdateSalt();
+}
+
+function wizSetUnit(u){
+  if(wizState.unit===u)return;
+  wizState.weight=u==='kg'?+(wizState.weight/2.20462).toFixed(1):+(wizState.weight*2.20462).toFixed(1);
+  wizState.unit=u;
+  document.getElementById('ct-unit').value=u;
+  document.getElementById('ct-weight').value=wizState.weight;
+  document.getElementById('wiz-weight-display').value=wizState.weight;
+  document.getElementById('wiz-unit-lbs').classList.toggle('sel',u==='lbs');
+  document.getElementById('wiz-unit-kg').classList.toggle('sel',u==='kg');
+  wizUpdateSalt();
+}
+
+function wizUpdateSalt(){
+  const wLbs=wizState.unit==='kg'?wizState.weight*2.20462:wizState.weight;
+  const grams=wLbs*453.592*0.012;
+  const tsp=grams/5.7;
+  document.getElementById('wiz-salt-val').textContent=tsp.toFixed(1)+' tsp  ·  '+(tsp/3).toFixed(1)+' tbsp  ·  '+grams.toFixed(0)+'g';
+  document.getElementById('wiz-salt-sub').textContent='For '+wizState.weight+' '+wizState.unit+' — apply overnight for best bark';
+}
+
+function wizPeopleAdj(d){
+  wizState.people=Math.max(1,wizState.people+d);
+  document.getElementById('wiz-people-val').textContent=wizState.people;
+}
+
+function wizRenderS4Sub(){
+  const d=MEAT[wizState.meat];
+  const el=document.getElementById('wiz-s4-sub');
+  if(el&&d)el.textContent=d.name+' · '+wizState.weight+' '+wizState.unit+(wizState.method?' · '+ML[wizState.method]:'');
+}
+
+function wizCalculate(){
+  wizState.ambient=parseInt(document.getElementById('wiz-ambient').value)||70;
+  wizState.windy=document.getElementById('wiz-windy').checked;
+  wizState.dinner=document.getElementById('wiz-dinner').value||'18:00';
+  // Sync to hidden form
+  document.getElementById('ct-weight').value=wizState.weight;
+  document.getElementById('ct-unit').value=wizState.unit;
+  document.getElementById('ct-dinner').value=wizState.dinner;
+  document.getElementById('ct-ambient').value=wizState.ambient;
+  document.getElementById('ct-windy').checked=wizState.windy;
+  document.getElementById('ct-people').value=wizState.people;
+  if(wizState.doneness)document.getElementById('ct-doneness').value=wizState.doneness;
+  if(wizState.method)document.getElementById('ct-method').value=wizState.method;
+  // Run calculation
+  calculateCookTime();
+  const resultHtml=document.getElementById('ct-result').innerHTML;
+  if(!resultHtml)return;
+  document.getElementById('wiz-result-inner').innerHTML=resultHtml;
+  document.getElementById('wiz-ui').style.display='none';
+  document.getElementById('wiz-result').style.display='';
+  renderGuide(wizState.meat);
+  const guide=document.getElementById('ct-guide');
+  const newCookBtn=document.querySelector('.wiz-new-cook');
+  if(guide&&newCookBtn)document.getElementById('wiz-result').insertBefore(guide,newCookBtn);
+  window.scrollTo(0,0);
+}
+
+function wizReset(){
+  wizState={step:1,meatCat:null,meat:null,method:null,weight:10,unit:'lbs',doneness:null,bone:null,dinner:'18:00',people:6,ambient:70,windy:false};
+  wizAllMode=false;
+  document.getElementById('wiz-result').style.display='none';
+  document.getElementById('wiz-ui').style.display='';
+  document.getElementById('wiz-ui').classList.remove('wiz-all-mode');
+  document.getElementById('wiz-all-calc').style.display='none';
+  document.querySelector('.wiz-see-all span').textContent='See all options at once ↓';
+  // Move guide back
+  document.getElementById('tab-cook').appendChild(document.getElementById('ct-guide'));
+  document.getElementById('wiz-weight-display').value='10';
+  document.getElementById('wiz-dinner').value='18:00';
+  document.getElementById('wiz-people-val').textContent='6';
+  const s1n=document.getElementById('wiz-s1-next');if(s1n)s1n.disabled=true;
+  wizShowStep(1);
+  wizRenderCuts();
+  window.scrollTo(0,0);
+}
+
+function toggleWizAll(){
+  wizAllMode=!wizAllMode;
+  const ui=document.getElementById('wiz-ui');
+  const allCalc=document.getElementById('wiz-all-calc');
+  const seeAllSpan=document.querySelector('.wiz-see-all span');
+  if(wizAllMode){
+    ui.classList.add('wiz-all-mode');
+    [1,2,3,4].forEach(i=>{const el=document.getElementById('wiz-s'+i);if(el)el.style.display='';});
+    document.querySelector('.wiz-progress').style.display='none';
+    allCalc.style.display='';
+    seeAllSpan.textContent='← Back to guided mode';
+    if(wizState.meat)wizRenderMethods();
+    wizRenderBone();wizRenderDoneness();wizUpdateSalt();
+  } else {
+    ui.classList.remove('wiz-all-mode');
+    document.querySelector('.wiz-progress').style.display='';
+    allCalc.style.display='none';
+    seeAllSpan.textContent='See all options at once ↓';
+    wizShowStep(wizState.step||1);
+  }
+}
+
+// ── SAUCES ────────────────────────────────────────────
+let sauceMult=1;
+
+function setSauceMult(m){
+  sauceMult=m;
+  [1,2,3].forEach(n=>{
+    const b=document.getElementById('sc-'+n+'x');
+    if(b)b.classList.toggle('sel',n===m);
+  });
+  renderSauces();
+}
+
+function fmtAmt(val,unit){
+  const fracs=[[.125,'⅛'],[.25,'¼'],[.333,'⅓'],[.5,'½'],[.667,'⅔'],[.75,'¾']];
+  const scaled=val*sauceMult;
+  if(scaled===0)return'0 '+unit;
+  const whole=Math.floor(scaled);
+  const dec=scaled-whole;
+  let fracStr='';
+  for(const[v,s]of fracs){if(Math.abs(dec-v)<0.04){fracStr=s;break;}}
+  if(!fracStr&&dec>0.04)fracStr=(dec).toFixed(1).replace('0.','.');
+  const numStr=whole>0?(fracStr?whole+' '+fracStr:whole.toString()):(fracStr||scaled.toFixed(1));
+  return numStr+' '+unit;
+}
+
+function renderSauces(){
+  document.getElementById('sc-list').innerHTML=SAUCES.map(s=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div style="font-size:1rem;font-weight:800;color:var(--text)">${s.name}</div>
+          <div style="font-size:.75rem;color:var(--accent);font-weight:700;margin-top:2px">${s.region} · ${s.type}</div>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);text-align:right;line-height:1.4">Yields<br>${s.yield}</div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px">Pairs: ${s.pairs}</div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:8px">
+        ${s.ings.map(i=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(90,60,38,.3)">
+          <span style="font-size:.82rem;color:var(--text)">${i.n}</span>
+          <span style="font-size:.82rem;color:var(--accent);font-weight:700">${fmtAmt(i.b,i.u)}</span>
+        </div>`).join('')}
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);font-style:italic;margin-bottom:8px">${s.cook}</div>
+      <div style="background:rgba(232,144,53,.08);border:1px solid rgba(232,144,53,.2);border-radius:6px;padding:8px 10px;font-size:.75rem;color:var(--text)">💡 ${s.notes}</div>
+    </div>`).join('');
+}
+
+// ── WET BRINE ─────────────────────────────────────────
+function calcWetBrine(){
+  const w=parseFloat(document.getElementById('wb-weight').value)||0;
+  const unit=document.getElementById('wb-unit').value;
+  const type=document.getElementById('wb-type').value;
+  if(!w)return;
+  const wLbs=unit==='kg'?w*2.20462:w;
+  // Water: ~1 quart per 2 lbs of meat
+  const waterQts=Math.ceil(wLbs/2);
+  const waterGrams=waterQts*946.35; // 1 qt = 946.35g
+  const saltGrams=waterGrams*0.04; // 4% equilibrium brine
+  const density={'kosher-morton':5.7,'kosher-diamond':2.8,'table':5.7}[type]||5.7;
+  const saltTsp=saltGrams/density;
+  document.getElementById('wb-result').innerHTML=`
+    <div style="margin-top:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--accent)">${waterQts} qt</div>
+          <div style="font-size:.72rem;color:var(--muted)">Cold Water</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--accent)">${saltTsp.toFixed(1)} tsp</div>
+          <div style="font-size:.72rem;color:var(--muted)">Salt (${saltGrams.toFixed(0)}g)</div>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted)">${(saltTsp/3).toFixed(1)} tbsp salt · ${waterQts} qt water · 4% equilibrium brine · fully submerge meat and refrigerate</div>
+    </div>`;
+}
+
+// ── INJECTION ─────────────────────────────────────────
+function calcInjection(){
+  const w=parseFloat(document.getElementById('inj-weight').value)||0;
+  const unit=document.getElementById('inj-unit').value;
+  const idx=parseInt(document.getElementById('inj-recipe').value)||0;
+  if(!w)return;
+  const wLbs=unit==='kg'?w*2.20462:w;
+  const rec=INJECTIONS[idx];
+  const targetOz=wLbs*1.6; // 10% of weight in oz (1 lb = 16oz, 10% = 1.6oz/lb)
+  const scaleFactor=targetOz/rec.baseOz;
+  document.getElementById('inj-result').innerHTML=`
+    <div style="margin-top:12px">
+      <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;margin-bottom:10px">
+        <div style="font-size:1.3rem;font-weight:800;color:var(--accent)">${targetOz.toFixed(1)} oz <span style="font-size:.9rem;color:var(--muted)">(${(targetOz/8).toFixed(1)} cups)</span></div>
+        <div style="font-size:.72rem;color:var(--muted)">Total injection needed for ${w} ${unit}</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:8px;margin-bottom:8px">
+        ${rec.ings.map(i=>{
+          const amt=i.u==='oz'?+(i.b*scaleFactor).toFixed(1):+(i.b*scaleFactor).toFixed(2);
+          const disp=i.u==='oz'?amt+' oz':fmtAmt(i.b*scaleFactor,i.u);
+          return`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(90,60,38,.3)">
+            <span style="font-size:.82rem;color:var(--text)">${i.n}</span>
+            <span style="font-size:.82rem;color:var(--accent);font-weight:700">${disp}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);font-style:italic">${rec.notes}</div>
+    </div>`;
+}
+
+// ── COOLER HOLD ───────────────────────────────────────
+function renderCoolerHold(){
+  document.getElementById('cooler-hold-list').innerHTML=COOLER_HOLD.map(h=>`
+    <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(90,60,38,.3)">
+      <div style="font-size:1.4rem;min-width:28px;text-align:center">${h.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+          <span style="font-size:.85rem;font-weight:700;color:var(--text)">${h.cut}</span>
+          <span style="font-size:.82rem;font-weight:800;color:var(--accent)">${h.max===0?'Serve now':h.min===0?'Up to '+h.max*60+' min':h.min+'–'+h.max+' hrs'}</span>
+        </div>
+        <div style="font-size:.75rem;color:var(--muted);line-height:1.4">${h.tip}</div>
+      </div>
+    </div>`).join('');
+}
+
 // ── INIT ──────────────────────────────────────────────
 updateCookOptions();
-calculateCookTime();
+wizInit();
 calcSalt();
+calcWetBrine();
+calcInjection();
 renderRubs();
+renderSauces();
+renderCoolerHold();
 initWood();
 initTemps();
 renderStyles();
+requestNotifPermission();
 </script>
 </body>
 </html>
