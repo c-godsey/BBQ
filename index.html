@@ -167,6 +167,9 @@ input[type=number]{-moz-appearance:textfield}
 .wiz-step-btn{width:42px;height:42px;border-radius:8px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0;user-select:none}
 .wiz-weight-val{flex:1;text-align:center;font-size:28px;font-weight:800;color:var(--text);background:none;border:none;outline:none;width:0;min-width:0;-moz-appearance:textfield}
 .wiz-weight-val::-webkit-outer-spin-button,.wiz-weight-val::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.wiz-weight-oz{width:44px;text-align:center;font-size:22px;font-weight:800;color:var(--accent);background:none;border:none;border-bottom:2px solid var(--border);outline:none;-moz-appearance:textfield;padding:0}
+.wiz-weight-oz:focus{border-bottom-color:var(--accent)}
+.wiz-weight-oz::-webkit-outer-spin-button,.wiz-weight-oz::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .wiz-unit-toggle{display:flex;background:var(--surface2);border-radius:8px;padding:3px;gap:2px;flex-shrink:0}
 .wiz-unit-btn{padding:6px 11px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none;color:var(--muted);background:none;-webkit-tap-highlight-color:transparent}
 .wiz-unit-btn.sel{background:var(--accent);color:#fff}
@@ -270,7 +273,15 @@ input[type=number]{-moz-appearance:textfield}
       <div class="wiz-step-sub" id="wiz-s3-sub"></div>
       <div class="wiz-weight-row">
         <div class="wiz-step-btn" onclick="wizWeightAdj(-1)">−</div>
-        <input class="wiz-weight-val" id="wiz-weight-display" type="number" inputmode="decimal" min="0.5" step="0.5" value="10" oninput="wizWeightTyped(this.value)" onblur="wizWeightBlur(this)">
+        <!-- lbs + oz inputs (shown when unit=lbs) -->
+        <div id="wiz-lbs-wrap" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px">
+          <input class="wiz-weight-val" id="wiz-weight-lbs" type="number" inputmode="numeric" min="0" step="1" value="10" oninput="wizWeightFromParts()" onblur="wizLbsBlur()">
+          <span style="font-size:13px;color:var(--muted);font-weight:700;flex-shrink:0">lbs</span>
+          <input class="wiz-weight-oz" id="wiz-weight-oz" type="number" inputmode="numeric" min="0" max="15" step="1" value="0" oninput="wizWeightFromParts()" onblur="wizOzBlur()">
+          <span style="font-size:13px;color:var(--muted);font-weight:700;flex-shrink:0">oz</span>
+        </div>
+        <!-- kg input (shown when unit=kg) -->
+        <input class="wiz-weight-val" id="wiz-weight-kg" type="number" inputmode="decimal" min="0.5" step="0.5" value="4.5" style="flex:1;display:none" oninput="wizWeightKgTyped(this.value)" onblur="wizWeightKgBlur(this)">
         <div class="wiz-step-btn" onclick="wizWeightAdj(1)">+</div>
         <div class="wiz-unit-toggle">
           <button class="wiz-unit-btn sel" id="wiz-unit-lbs" onclick="wizSetUnit('lbs')">lbs</button>
@@ -1817,17 +1828,55 @@ function wizSetDoneness(v){
   wizRenderDoneness();
 }
 
+function _wizWeightLbsFromState(){
+  // Sync lbs+oz fields from wizState.weight
+  const wholeLbs=Math.floor(wizState.weight);
+  const oz=Math.round((wizState.weight-wholeLbs)*16);
+  document.getElementById('wiz-weight-lbs').value=wholeLbs;
+  document.getElementById('wiz-weight-oz').value=oz;
+}
+
 function wizWeightAdj(d){
-  const step=wizState.unit==='kg'?.5:1;
-  const min=wizState.unit==='kg'?.5:1;
-  wizState.weight=Math.max(min,+(wizState.weight+d*step).toFixed(1));
-  const el=document.getElementById('wiz-weight-display');
-  el.value=wizState.weight;
+  if(wizState.unit==='kg'){
+    wizState.weight=Math.max(.5,+(wizState.weight+d*.5).toFixed(1));
+    document.getElementById('wiz-weight-kg').value=wizState.weight;
+  } else {
+    const lbsEl=document.getElementById('wiz-weight-lbs');
+    let lbs=Math.max(0,(parseInt(lbsEl.value)||0)+d);
+    lbsEl.value=lbs;
+    wizWeightFromParts();
+    return;
+  }
   document.getElementById('ct-weight').value=wizState.weight;
   wizUpdateSalt();
 }
 
-function wizWeightTyped(v){
+function wizWeightFromParts(){
+  const lbs=Math.max(0,parseInt(document.getElementById('wiz-weight-lbs').value)||0);
+  const oz=Math.min(15,Math.max(0,parseFloat(document.getElementById('wiz-weight-oz').value)||0));
+  wizState.weight=+(lbs+oz/16).toFixed(4);
+  document.getElementById('ct-weight').value=wizState.weight;
+  wizUpdateSalt();
+}
+
+function wizLbsBlur(){
+  const el=document.getElementById('wiz-weight-lbs');
+  let v=parseInt(el.value);
+  if(isNaN(v)||v<0)v=0;
+  el.value=v;
+  wizWeightFromParts();
+}
+
+function wizOzBlur(){
+  const el=document.getElementById('wiz-weight-oz');
+  let v=parseFloat(el.value);
+  if(isNaN(v)||v<0)v=0;
+  if(v>=16)v=15;
+  el.value=Math.round(v);
+  wizWeightFromParts();
+}
+
+function wizWeightKgTyped(v){
   const parsed=parseFloat(v);
   if(!isNaN(parsed)&&parsed>0){
     wizState.weight=parsed;
@@ -1836,26 +1885,40 @@ function wizWeightTyped(v){
   }
 }
 
-function wizWeightBlur(el){
-  const min=wizState.unit==='kg'?.5:1;
+function wizWeightKgBlur(el){
   const parsed=parseFloat(el.value);
-  const safe=isNaN(parsed)||parsed<min?min:+parsed.toFixed(1);
-  wizState.weight=safe;
-  el.value=safe;
+  const safe=isNaN(parsed)||parsed<.5?.5:+parsed.toFixed(1);
+  wizState.weight=safe;el.value=safe;
   document.getElementById('ct-weight').value=safe;
   wizUpdateSalt();
 }
 
 function wizSetUnit(u){
   if(wizState.unit===u)return;
-  wizState.weight=u==='kg'?+(wizState.weight/2.20462).toFixed(1):+(wizState.weight*2.20462).toFixed(1);
+  if(u==='kg'){
+    wizState.weight=+(wizState.weight/2.20462).toFixed(1);
+    document.getElementById('wiz-lbs-wrap').style.display='none';
+    const kg=document.getElementById('wiz-weight-kg');
+    kg.style.display='';kg.value=wizState.weight;
+  } else {
+    wizState.weight=+(wizState.weight*2.20462).toFixed(4);
+    document.getElementById('wiz-weight-kg').style.display='none';
+    document.getElementById('wiz-lbs-wrap').style.display='flex';
+    _wizWeightLbsFromState();
+  }
   wizState.unit=u;
   document.getElementById('ct-unit').value=u;
   document.getElementById('ct-weight').value=wizState.weight;
-  document.getElementById('wiz-weight-display').value=wizState.weight;
   document.getElementById('wiz-unit-lbs').classList.toggle('sel',u==='lbs');
   document.getElementById('wiz-unit-kg').classList.toggle('sel',u==='kg');
   wizUpdateSalt();
+}
+
+function wizWeightDisplay(){
+  if(wizState.unit==='kg')return wizState.weight+' kg';
+  const wholeLbs=Math.floor(wizState.weight);
+  const oz=Math.round((wizState.weight-wholeLbs)*16);
+  return oz>0?`${wholeLbs} lbs ${oz} oz`:`${wholeLbs} lbs`;
 }
 
 function wizUpdateSalt(){
@@ -1863,7 +1926,7 @@ function wizUpdateSalt(){
   const grams=wLbs*453.592*0.012;
   const tsp=grams/5.7;
   document.getElementById('wiz-salt-val').textContent=tsp.toFixed(1)+' tsp  ·  '+(tsp/3).toFixed(1)+' tbsp  ·  '+grams.toFixed(0)+'g';
-  document.getElementById('wiz-salt-sub').textContent='For '+wizState.weight+' '+wizState.unit+' — apply overnight for best bark';
+  document.getElementById('wiz-salt-sub').textContent='For '+wizWeightDisplay()+' — apply overnight for best bark';
 }
 
 function wizPeopleAdj(d){
@@ -1874,7 +1937,7 @@ function wizPeopleAdj(d){
 function wizRenderS4Sub(){
   const d=MEAT[wizState.meat];
   const el=document.getElementById('wiz-s4-sub');
-  if(el&&d)el.textContent=d.name+' · '+wizState.weight+' '+wizState.unit+(wizState.method?' · '+ML[wizState.method]:'');
+  if(el&&d)el.textContent=d.name+' · '+wizWeightDisplay()+(wizState.method?' · '+ML[wizState.method]:'');
 }
 
 function wizCalculate(){
@@ -1914,7 +1977,10 @@ function wizReset(){
   document.querySelector('.wiz-see-all span').textContent='See all options at once ↓';
   // Move guide back
   document.getElementById('tab-cook').appendChild(document.getElementById('ct-guide'));
-  document.getElementById('wiz-weight-display').value='10';
+  document.getElementById('wiz-weight-lbs').value='10';
+  document.getElementById('wiz-weight-oz').value='0';
+  document.getElementById('wiz-lbs-wrap').style.display='flex';
+  document.getElementById('wiz-weight-kg').style.display='none';
   document.getElementById('wiz-dinner').value='18:00';
   document.getElementById('wiz-people-val').textContent='6';
   const s1n=document.getElementById('wiz-s1-next');if(s1n)s1n.disabled=true;
